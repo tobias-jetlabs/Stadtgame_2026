@@ -5,723 +5,1200 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Habsburger Stadtgame</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+/* ═══════════════════════════════════════════ RESET & VARS */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --ink:       #1a1208;
-    --parchment: #f4ead0;
-    --parchment-dark: #e8d9b0;
-    --parchment-mid:  #eee0c0;
-    --gold:      #c5942a;
-    --gold-light:#e8c060;
-    --red:       #8b2020;
-    --stone:     #8a7a6a;
-    --moss:      #4a6741;
-    --shadow:    rgba(26,18,8,0.18);
+:root {
+  --ink:        #12100a;
+  --ink2:       #1c1810;
+  --ink3:       #252018;
+  --parchment:  #f0e6c8;
+  --parch2:     #ddd0a8;
+  --gold:       #c8942a;
+  --gold2:      #e8c060;
+  --gold-dim:   #7a5a18;
+  --red:        #c0392b;
+  --stone-col:  #8a7a6a;
+  --shadow:     rgba(0,0,0,0.5);
+  --wood-col:   #6b4c2a;
+  --iron-col:   #607080;
+  --r-red:      #e74c3c; --r-blue: #2980b9; --r-green: #27ae60;
+  --r-yellow:   #d4ac0d; --r-purple: #8e44ad; --r-orange: #e67e22;
+}
 
-    --group-red:    #c0392b;
-    --group-blue:   #2980b9;
-    --group-green:  #27ae60;
-    --group-yellow: #d4ac0d;
-  }
+body {
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: 'Georgia', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ═══════════════════════════════════════════ LOGIN SCREEN */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 30% 30%, #2a1a04 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 70%, #0a1a2a 0%, transparent 55%),
+    var(--ink);
+}
 
-  body {
-    background: var(--ink);
-    color: var(--ink);
-    font-family: 'Lora', Georgia, serif;
-    min-height: 100vh;
-    background-image:
-      radial-gradient(ellipse at 20% 20%, #2a1a04 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 80%, #1a2a04 0%, transparent 60%);
-  }
+.login-box {
+  background: var(--ink2);
+  border: 2px solid var(--gold-dim);
+  border-radius: 8px;
+  padding: 40px 48px;
+  width: 360px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(200,148,42,0.15);
+  text-align: center;
+}
 
-  /* ── Header ── */
-  header {
-    background: linear-gradient(180deg, #2a1a04 0%, #1a1208 100%);
-    border-bottom: 2px solid var(--gold);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  }
+.login-crest {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 12px rgba(200,148,42,0.4));
+}
 
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--gold-light);
-    letter-spacing: 0.05em;
-    text-shadow: 0 0 20px rgba(197,148,42,0.4);
-    flex: 1;
-  }
+.login-title {
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
+  color: var(--gold2);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
 
-  header h1 span { color: var(--gold); font-weight: 400; }
+.login-subtitle {
+  font-size: 0.78rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.1em;
+  margin-bottom: 28px;
+}
 
-  .header-dice {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(197,148,42,0.1);
-    border: 1px solid rgba(197,148,42,0.3);
-    border-radius: 6px;
-    padding: 8px 14px;
-    font-family: 'Cinzel', serif;
-    color: var(--gold-light);
-    font-size: 0.9rem;
-  }
+.login-box input[type=text], .login-box input[type=password] {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,148,42,0.3);
+  border-radius: 5px;
+  padding: 12px 14px;
+  color: var(--parchment);
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
 
-  .dice-num {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--gold);
-    line-height: 1;
-  }
+.login-box input:focus { border-color: var(--gold); }
 
-  .timer {
-    font-size: 0.85rem;
-    color: #a89060;
-    font-family: 'JetBrains Mono', monospace;
-  }
+.login-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(200,148,42,0.3), rgba(200,148,42,0.15));
+  border: 1px solid var(--gold);
+  color: var(--gold2);
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-  /* ── Layout ── */
-  .app {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    grid-template-rows: auto 1fr;
-    gap: 0;
-    min-height: calc(100vh - 61px);
-  }
+.login-btn:hover {
+  background: linear-gradient(135deg, rgba(200,148,42,0.5), rgba(200,148,42,0.3));
+  box-shadow: 0 0 16px rgba(200,148,42,0.3);
+}
 
-  /* ── Map panel ── */
-  .map-panel {
-    grid-column: 1;
-    grid-row: 1 / 3;
-    padding: 20px;
-    background: #1e150a;
-    position: relative;
-  }
+.login-error {
+  color: #e08080;
+  font-size: 0.8rem;
+  margin-top: 10px;
+  min-height: 20px;
+}
 
-  .map-panel h2 {
-    font-family: 'Cinzel', serif;
-    color: var(--gold);
-    font-size: 0.85rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    opacity: 0.7;
-  }
+/* ═══════════════════════════════════════════ MAIN APP */
+#app { display: none; flex-direction: column; min-height: 100vh; }
 
-  #map-svg {
-    width: 100%;
-    max-width: 720px;
-    display: block;
-  }
+/* ── HEADER */
+header {
+  background: linear-gradient(180deg, #2a1a04 0%, var(--ink2) 100%);
+  border-bottom: 2px solid var(--gold-dim);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
 
-  .territory {
-    cursor: pointer;
-    transition: filter 0.15s;
-  }
+.hdr-title {
+  font-size: 1.2rem;
+  color: var(--gold2);
+  letter-spacing: 0.04em;
+  flex: 1;
+}
 
-  .territory:hover { filter: brightness(1.15); }
-  .territory:hover .territory-hex { stroke-width: 3; }
+.hdr-title span { color: var(--gold-dim); font-size: 0.75rem; }
 
-  .territory-hex {
-    stroke: rgba(197,148,42,0.4);
-    stroke-width: 1.5;
-    transition: all 0.2s;
-  }
+.hdr-player-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(200,148,42,0.2);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: #bbb;
+}
 
-  .territory-label {
-    font-family: 'Cinzel', serif;
-    font-size: 7px;
-    fill: rgba(255,255,255,0.8);
-    text-anchor: middle;
-    pointer-events: none;
-    dominant-baseline: middle;
-  }
+.hdr-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
 
-  .territory-number {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    fill: var(--gold-light);
-    text-anchor: middle;
-    pointer-events: none;
-  }
+.hdr-dice-box {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(200,148,42,0.08);
+  border: 1px solid rgba(200,148,42,0.25);
+  border-radius: 5px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  color: var(--gold-dim);
+}
 
-  .territory-buildings {
-    font-size: 9px;
-    text-anchor: middle;
-    pointer-events: none;
-  }
+.hdr-dice-val {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--gold);
+  font-family: 'Courier New', monospace;
+  line-height: 1;
+}
 
-  .capital-ring {
-    fill: none;
-    stroke: var(--gold);
-    stroke-width: 2;
-    stroke-dasharray: 4,2;
-    opacity: 0.8;
-    animation: spin 20s linear infinite;
-    transform-origin: center;
-  }
+.hdr-timer {
+  font-family: 'Courier New', monospace;
+  color: #8a7a50;
+  font-size: 0.9rem;
+}
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+.hdr-auto-badge {
+  font-size: 0.65rem;
+  background: rgba(0,200,100,0.1);
+  border: 1px solid rgba(0,200,100,0.25);
+  color: #4a8;
+  border-radius: 3px;
+  padding: 2px 5px;
+}
 
-  /* ── Right sidebar ── */
-  .sidebar {
-    grid-column: 2;
-    background: #160f06;
-    border-left: 1px solid rgba(197,148,42,0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+.logout-btn {
+  background: transparent;
+  border: 1px solid rgba(200,148,42,0.2);
+  color: var(--gold-dim);
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+}
+.logout-btn:hover { border-color: var(--gold); color: var(--gold2); }
 
-  /* ── Scoreboard ── */
-  .scoreboard {
-    padding: 16px;
-    border-bottom: 1px solid rgba(197,148,42,0.15);
-  }
+/* ── TABS */
+.tab-bar {
+  background: var(--ink2);
+  border-bottom: 1px solid rgba(200,148,42,0.15);
+  display: flex;
+  gap: 0;
+  padding: 0 20px;
+}
 
-  .section-title {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--gold);
-    opacity: 0.6;
-    margin-bottom: 10px;
-  }
+.tab {
+  padding: 10px 18px;
+  font-size: 0.82rem;
+  color: var(--gold-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
 
-  .group-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.2s;
-    cursor: pointer;
-  }
+.tab:hover { color: var(--gold2); }
+.tab.active { color: var(--gold2); border-bottom-color: var(--gold); }
 
-  .group-row:hover { background: rgba(255,255,255,0.06); }
-  .group-row.selected { background: rgba(197,148,42,0.1); border-color: rgba(197,148,42,0.3); }
+/* ── MAIN BODY */
+.content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  height: calc(100vh - 100px);
+}
 
-  .group-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    box-shadow: 0 0 6px currentColor;
-  }
+.panel { display: none; flex: 1; overflow: hidden; }
+.panel.active { display: flex; }
 
-  .group-name {
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    color: var(--parchment);
-    flex: 1;
-  }
+/* ═══════════════════════════════════════════ MAP PANEL */
+#panel-map {
+  flex-direction: row;
+  gap: 0;
+}
 
-  .group-points {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--gold-light);
-  }
+.map-area {
+  flex: 1;
+  background: #140f08;
+  padding: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
-  .group-pts-label {
-    font-size: 0.65rem;
-    color: #6a5a40;
-  }
+.map-area h3 {
+  font-size: 0.7rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
 
-  .group-resources {
-    display: flex;
-    gap: 6px;
-    font-size: 0.7rem;
-    color: #a08060;
-    font-family: 'JetBrains Mono', monospace;
-  }
+#map-svg {
+  flex: 1;
+  width: 100%;
+  max-height: 100%;
+}
 
-  .res-badge {
-    background: rgba(255,255,255,0.05);
-    border-radius: 3px;
-    padding: 2px 5px;
-  }
+/* ── MAP SIDEBAR */
+.map-sidebar {
+  width: 280px;
+  border-left: 1px solid rgba(200,148,42,0.15);
+  background: var(--ink2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  .res-badge .res-icon { margin-right: 2px; }
+.msb-section {
+  padding: 14px;
+  border-bottom: 1px solid rgba(200,148,42,0.1);
+}
 
-  /* ── Actions panel ── */
-  .actions-panel {
-    padding: 16px;
-    border-bottom: 1px solid rgba(197,148,42,0.15);
-  }
+.msb-title {
+  font-size: 0.68rem;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
 
-  .action-group-select {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
+/* Score rows */
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 4px;
+  margin-bottom: 3px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: background 0.15s;
+}
 
-  .group-btn {
-    flex: 1;
-    padding: 6px 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.04);
-    color: #a08060;
-    border-radius: 3px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    transition: all 0.15s;
-    text-align: center;
-  }
+.score-row:hover { background: rgba(255,255,255,0.05); }
 
-  .group-btn:hover { background: rgba(255,255,255,0.08); }
-  .group-btn.active { color: #fff; font-weight: 600; }
+.score-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  flex-shrink: 0;
+}
 
-  .territory-select {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(197,148,42,0.2);
-    color: var(--parchment);
-    border-radius: 4px;
-    padding: 7px 10px;
-    font-family: 'Lora', serif;
-    font-size: 0.8rem;
-    margin-bottom: 10px;
-    appearance: none;
-  }
+.score-name {
+  font-size: 0.78rem;
+  flex: 1;
+  color: #ccc;
+}
 
-  .territory-select option { background: #1a1208; }
+.score-pts {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--gold2);
+}
 
-  .build-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
+.score-pts-lbl {
+  font-size: 0.6rem;
+  color: #5a4a30;
+}
 
-  .build-btn {
-    padding: 8px 4px;
-    border: 1px solid rgba(197,148,42,0.25);
-    background: rgba(197,148,42,0.06);
-    color: var(--gold-light);
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    text-align: center;
-    transition: all 0.15s;
-    line-height: 1.4;
-  }
+.res-chips {
+  display: flex;
+  gap: 4px;
+  margin-top: 3px;
+}
 
-  .build-btn:hover { background: rgba(197,148,42,0.15); border-color: var(--gold); }
+.res-chip {
+  font-size: 0.65rem;
+  font-family: 'Courier New', monospace;
+  background: rgba(255,255,255,0.04);
+  border-radius: 3px;
+  padding: 2px 5px;
+  color: #8a7a60;
+}
 
-  .build-btn .emoji { display: block; font-size: 1.1rem; margin-bottom: 3px; }
-  .build-btn .cost { display: block; font-size: 0.6rem; color: #8a7a5a; margin-top: 2px; }
+/* Build panel (player) */
+.build-section {
+  padding: 14px;
+  border-bottom: 1px solid rgba(200,148,42,0.1);
+}
 
-  .conquer-btn {
-    width: 100%;
-    padding: 9px;
-    background: rgba(139,32,32,0.2);
-    border: 1px solid rgba(139,32,32,0.4);
-    color: #e08080;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    transition: all 0.15s;
-    margin-bottom: 6px;
-  }
+.terr-sel {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(200,148,42,0.2);
+  color: var(--parchment);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  appearance: none;
+}
 
-  .conquer-btn:hover { background: rgba(139,32,32,0.35); border-color: #c04040; }
+.terr-sel option { background: #1c1810; }
 
-  .dice-btn {
-    width: 100%;
-    padding: 10px;
-    background: linear-gradient(135deg, rgba(197,148,42,0.2), rgba(197,148,42,0.1));
-    border: 1px solid rgba(197,148,42,0.4);
-    color: var(--gold-light);
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
-  }
+.bld-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
 
-  .dice-btn:hover {
-    background: linear-gradient(135deg, rgba(197,148,42,0.35), rgba(197,148,42,0.2));
-    box-shadow: 0 0 14px rgba(197,148,42,0.25);
-  }
+.bld-btn {
+  padding: 8px 4px;
+  background: rgba(200,148,42,0.07);
+  border: 1px solid rgba(200,148,42,0.2);
+  border-radius: 4px;
+  color: var(--gold2);
+  cursor: pointer;
+  font-size: 0.68rem;
+  text-align: center;
+  transition: all 0.15s;
+  line-height: 1.4;
+}
 
-  /* ── Event log ── */
-  .event-log {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-    min-height: 0;
-  }
+.bld-btn:hover { background: rgba(200,148,42,0.18); border-color: var(--gold); }
+.bld-btn .bld-icon { display: block; font-size: 1.3rem; margin-bottom: 3px; }
+.bld-btn .bld-cost { display: block; font-size: 0.58rem; color: #7a6a50; margin-top: 2px; }
 
-  .event-item {
-    display: flex;
-    gap: 8px;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    font-size: 0.75rem;
-    color: #9a8a6a;
-    line-height: 1.4;
-  }
+/* Event log */
+.event-log {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  min-height: 0;
+}
 
-  .event-time {
-    color: #6a5a40;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    flex-shrink: 0;
-    padding-top: 1px;
-  }
+.ev-item {
+  display: flex;
+  gap: 7px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.73rem;
+  line-height: 1.4;
+}
 
-  .event-msg { color: #b0a080; }
+.ev-time {
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  color: #5a4a30;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
 
-  /* ── Toast ── */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #2a1a04;
-    border: 1px solid var(--gold);
-    color: var(--gold-light);
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    max-width: 90vw;
-    text-align: center;
-  }
+.ev-msg { color: #a09070; }
 
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  #toast.error { border-color: #c04040; color: #e08080; }
+/* ═══════════════════════════════════════════ ADMIN PANEL */
+#panel-admin {
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px;
+  gap: 16px;
+  background: var(--ink);
+}
 
-  /* ── Tooltip ── */
-  #tooltip {
-    position: fixed;
-    background: #1a1208;
-    border: 1px solid rgba(197,148,42,0.4);
-    color: var(--parchment);
-    padding: 10px 14px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    pointer-events: none;
-    z-index: 200;
-    display: none;
-    max-width: 200px;
-    line-height: 1.5;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-  }
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
 
-  #tooltip .tt-title {
-    font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    color: var(--gold-light);
-    margin-bottom: 4px;
-  }
+.admin-card {
+  background: var(--ink2);
+  border: 1px solid rgba(200,148,42,0.15);
+  border-radius: 6px;
+  padding: 16px;
+}
 
-  #tooltip .tt-owner { margin-top: 4px; font-size: 0.75rem; }
-  #tooltip .tt-bld { font-size: 0.75rem; color: #9a8a6a; }
+.admin-card.full { grid-column: 1 / -1; }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-  ::-webkit-scrollbar-thumb { background: rgba(197,148,42,0.25); border-radius: 3px; }
+.admin-card h3 {
+  font-size: 0.72rem;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  opacity: 0.8;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(200,148,42,0.12);
+}
 
-  @media (max-width: 800px) {
-    .app { grid-template-columns: 1fr; grid-template-rows: auto auto; }
-    .sidebar { grid-column: 1; max-height: 60vh; overflow-y: auto; }
-    .map-panel { grid-row: 1; }
-  }
+/* Dice config */
+.dice-config-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.dice-config-row label {
+  font-size: 0.78rem;
+  color: #9a8a60;
+  min-width: 100px;
+}
+
+.adm-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,148,42,0.25);
+  border-radius: 4px;
+  color: var(--parchment);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  width: 90px;
+  font-family: 'Courier New', monospace;
+}
+
+.adm-select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,148,42,0.25);
+  border-radius: 4px;
+  color: var(--parchment);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+}
+
+.adm-select option { background: #1c1810; }
+
+.adm-btn {
+  padding: 7px 14px;
+  background: rgba(200,148,42,0.12);
+  border: 1px solid rgba(200,148,42,0.3);
+  color: var(--gold2);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.15s;
+}
+
+.adm-btn:hover { background: rgba(200,148,42,0.25); border-color: var(--gold); }
+
+.adm-btn.danger {
+  background: rgba(180,40,40,0.12);
+  border-color: rgba(180,40,40,0.3);
+  color: #e08080;
+}
+
+.adm-btn.danger:hover { background: rgba(180,40,40,0.25); border-color: #c04040; }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.toggle {
+  position: relative;
+  width: 40px; height: 22px;
+  cursor: pointer;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 22px;
+  transition: 0.2s;
+}
+
+.toggle input:checked + .toggle-slider { background: rgba(200,148,42,0.5); }
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 3px; top: 3px;
+  background: #888;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+  background: var(--gold2);
+}
+
+/* Resource editor */
+.res-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.res-group-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.res-group-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+.res-group-name {
+  font-size: 0.75rem;
+  color: #ccc;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.res-inputs {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  align-items: center;
+}
+
+.res-field {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.res-field label { font-size: 0.65rem; color: #7a6a50; }
+
+.res-inp {
+  width: 56px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(200,148,42,0.2);
+  border-radius: 3px;
+  color: var(--parchment);
+  padding: 4px 6px;
+  font-size: 0.78rem;
+  font-family: 'Courier New', monospace;
+  text-align: right;
+}
+
+.res-save-btn {
+  padding: 4px 10px;
+  background: rgba(200,148,42,0.1);
+  border: 1px solid rgba(200,148,42,0.25);
+  color: var(--gold2);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.res-save-btn:hover { background: rgba(200,148,42,0.22); }
+
+/* Territory admin table */
+.terr-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.terr-admin-table th {
+  text-align: left;
+  color: var(--gold-dim);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(200,148,42,0.15);
+  font-weight: normal;
+}
+
+.terr-admin-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+
+.terr-admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.terr-owner-sel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(200,148,42,0.2);
+  border-radius: 3px;
+  color: var(--parchment);
+  padding: 3px 6px;
+  font-size: 0.72rem;
+  width: 100%;
+}
+
+.terr-owner-sel option { background: #1c1810; }
+
+.bld-tags {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.bld-tag {
+  font-size: 0.65rem;
+  background: rgba(200,148,42,0.1);
+  border: 1px solid rgba(200,148,42,0.2);
+  border-radius: 3px;
+  padding: 2px 5px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.bld-tag:hover { background: rgba(180,40,40,0.25); border-color: #c04040; color: #e08080; }
+
+.add-bld-sel {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(200,148,42,0.15);
+  border-radius: 3px;
+  color: #8a7a60;
+  padding: 2px 5px;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+
+.add-bld-sel option { background: #1c1810; }
+
+/* ═══════════════════════════════════════════ SVG BUILDINGS */
+/* Buildings are drawn as SVG shapes, not emoji */
+
+/* ═══════════════════════════════════════════ TOOLTIP */
+#tooltip {
+  position: fixed;
+  background: var(--ink2);
+  border: 1px solid rgba(200,148,42,0.35);
+  color: var(--parchment);
+  padding: 10px 13px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  pointer-events: none;
+  z-index: 500;
+  display: none;
+  max-width: 200px;
+  line-height: 1.55;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.5);
+}
+
+.tt-title { font-size: 0.9rem; color: var(--gold2); margin-bottom: 4px; font-weight: bold; }
+.tt-res { font-size: 0.7rem; color: var(--gold-dim); letter-spacing: 0.06em; }
+.tt-line { font-size: 0.73rem; color: #9a8a60; margin-top: 3px; }
+
+/* ═══════════════════════════════════════════ TOAST */
+#toast {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink2);
+  border: 1px solid var(--gold);
+  color: var(--gold2);
+  padding: 9px 20px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  z-index: 999;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  max-width: 90vw;
+  text-align: center;
+  pointer-events: none;
+}
+
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.err { border-color: #c04040; color: #e08080; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+::-webkit-scrollbar-thumb { background: rgba(200,148,42,0.2); border-radius: 3px; }
+
+@media (max-width: 900px) {
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-card.full { grid-column: 1; }
+  #panel-map { flex-direction: column; }
+  .map-sidebar { width: 100%; max-height: 45vh; }
+}
+
+/* ── Legend dots ── */
+.legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: #8a7a60; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🏰 Habsburger <span>Stadtgame</span></h1>
-  <div class="header-dice">
-    <div>
-      <div class="dice-num" id="hdr-dice">—</div>
-      <div style="font-size:0.65rem;color:#6a5a40;">Letzter Wurf</div>
-    </div>
-    <div>
-      <div class="timer" id="hdr-timer">—:——</div>
-      <div style="font-size:0.65rem;color:#6a5a40;">Nächster</div>
-    </div>
-  </div>
-</header>
-
-<div class="app">
-
-  <!-- ── Map ── -->
-  <div class="map-panel">
-    <h2>Karte von Altdorf</h2>
-    <svg id="map-svg" viewBox="0 0 720 560" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <pattern id="bg-pattern" patternUnits="userSpaceOnUse" width="20" height="20">
-          <circle cx="10" cy="10" r="0.5" fill="rgba(197,148,42,0.1)"/>
-        </pattern>
-      </defs>
-      <rect width="720" height="560" fill="url(#bg-pattern)"/>
-      <!-- Territories will be drawn by JS -->
-    </svg>
-  </div>
-
-  <!-- ── Sidebar ── -->
-  <div class="sidebar">
-
-    <!-- Scoreboard -->
-    <div class="scoreboard">
-      <div class="section-title">⚔ Rangliste</div>
-      <div id="scoreboard-list"></div>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions-panel">
-      <div class="section-title">⚒ Aktionen</div>
-
-      <div class="action-group-select" id="group-btns"></div>
-
-      <select class="territory-select" id="territory-sel">
-        <option value="">— Territorium wählen —</option>
-      </select>
-
-      <div class="build-buttons" id="build-btns"></div>
-
-      <button class="conquer-btn" onclick="doConquer()">⚔️ Territorium erobern</button>
-      <button class="dice-btn" onclick="doRoll()">🎲 Würfeln (Spielleitung)</button>
-    </div>
-
-    <!-- Event log -->
-    <div class="event-log">
-      <div class="section-title">📜 Ereignisse</div>
-      <div id="event-list"></div>
-    </div>
-
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-crest">⚜️</div>
+    <div class="login-title">Habsburger Stadtgame</div>
+    <div class="login-subtitle">ALTDORF · 2025</div>
+    <input type="password" id="login-input" placeholder="Geheimcode eingeben" autocomplete="off"/>
+    <button class="login-btn" onclick="doLogin()">▶ Beitreten</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <header>
+    <div class="hdr-title">
+      🏰 Habsburger Stadtgame
+      <span id="hdr-role-badge"></span>
+    </div>
+
+    <div class="hdr-player-badge" id="hdr-player-badge" style="display:none">
+      <div class="hdr-dot" id="hdr-dot"></div>
+      <span id="hdr-player-name"></span>
+    </div>
+
+    <div class="hdr-dice-box">
+      <div>
+        <div class="hdr-dice-val" id="hdr-dice">—</div>
+        <div style="font-size:0.6rem;color:#6a5a30">Letzter Wurf</div>
+      </div>
+      <div>
+        <div class="hdr-timer" id="hdr-timer">—:——</div>
+        <div style="font-size:0.6rem;color:#6a5a30">Nächster</div>
+      </div>
+      <div class="hdr-auto-badge" id="hdr-auto-badge">AUTO</div>
+    </div>
+
+    <button class="logout-btn" onclick="doLogout()">Abmelden</button>
+  </header>
+
+  <div class="tab-bar" id="tab-bar">
+    <div class="tab active" data-tab="map" onclick="switchTab('map')">🗺 Spielfeld</div>
+    <div class="tab" data-tab="admin" onclick="switchTab('admin')" id="admin-tab" style="display:none">⚙ Admin</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ MAP PANEL ══ -->
+    <div class="panel active" id="panel-map">
+      <div class="map-area">
+        <h3>Karte von Altdorf – 24 Territorien</h3>
+        <svg id="map-svg" viewBox="0 0 780 600" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="glow-f" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glow-sm" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- filled by JS -->
+        </svg>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#6b4c2a"></div>Holzfelder (Innen)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5a5a6a"></div>Steinfelder (Mitte)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4a5a6a"></div>Eisenfelder (Rand)</div>
+        </div>
+      </div>
+
+      <div class="map-sidebar">
+        <!-- Scoreboard -->
+        <div class="msb-section">
+          <div class="msb-title">⚔ Rangliste</div>
+          <div id="scoreboard"></div>
+        </div>
+
+        <!-- Build section (shown for players) -->
+        <div class="build-section" id="player-build-section">
+          <div class="msb-title">⚒ Bauen</div>
+          <select class="terr-sel" id="build-terr-sel">
+            <option value="">— Territorium wählen —</option>
+          </select>
+          <div class="bld-grid" id="bld-grid"></div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="event-log" id="event-log">
+          <div class="msb-title">📜 Ereignisse</div>
+          <div id="event-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN PANEL ══ -->
+    <div class="panel" id="panel-admin">
+
+      <div class="admin-grid">
+
+        <!-- Würfel-Konfiguration -->
+        <div class="admin-card">
+          <h3>🎲 Würfelkonfiguration</h3>
+
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="auto-dice-toggle" onchange="saveAutoConfig()"/>
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:0.8rem;color:#9a8a60">Automatisches Würfeln</span>
+          </div>
+
+          <div class="dice-config-row">
+            <label>Interval (Minuten)</label>
+            <input class="adm-input" type="number" id="dice-interval" min="1" max="120" value="15"/>
+            <button class="adm-btn" onclick="saveAutoConfig()">Speichern</button>
+          </div>
+
+          <div class="dice-config-row">
+            <label>Manuell würfeln</label>
+            <input class="adm-input" type="number" id="manual-dice-val" min="2" max="12" placeholder="2–12"/>
+            <button class="adm-btn" onclick="adminDice()">🎲 Würfeln</button>
+          </div>
+        </div>
+
+        <!-- Schnellinfo -->
+        <div class="admin-card">
+          <h3>⚡ Schnellaktionen</h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="adm-btn" onclick="adminDice()">🎲 Zufälliger Würfelwurf</button>
+            <button class="adm-btn danger" onclick="adminReset()">🔄 Spiel zurücksetzen</button>
+          </div>
+          <div style="margin-top:14px;font-size:0.7rem;color:#5a4a30;line-height:1.6">
+            <div id="admin-codes-display"></div>
+          </div>
+        </div>
+
+        <!-- Ressourcen Editor -->
+        <div class="admin-card full">
+          <h3>💰 Ressourcen bearbeiten</h3>
+          <div class="res-editor" id="res-editor"></div>
+        </div>
+
+        <!-- Territorien Editor -->
+        <div class="admin-card full">
+          <h3>🗺 Territorien & Gebäude verwalten</h3>
+          <div style="overflow-x:auto">
+            <table class="terr-admin-table" id="terr-admin-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Ressource</th>
+                  <th>Zahl</th>
+                  <th>Besitzer</th>
+                  <th>Gebäude</th>
+                  <th>Hinzufügen</th>
+                </tr>
+              </thead>
+              <tbody id="terr-admin-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /admin panel -->
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
 <div id="tooltip"></div>
+<div id="toast"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// Config
+// STATE
 // ═══════════════════════════════════════════════════════════════
-const API = '';  // same origin
+let session = null;   // { role, groupId, name, code }
 let gameState = null;
-let selectedGroup = null;
+let pollTimer = null;
+let uiTimer = null;
 
-// ── Hex grid layout ──────────────────────────────────────────
-// Offset hex positions for 19 territories in a Catan-like layout
-const HEX_R = 46;  // outer radius
-const HEX_POSITIONS = {
-  // Row 0 (top, 3 hexes)
-  '1':  [180, 80],
-  '2':  [276, 80],
-  '3':  [372, 80],
+// ═══════════════════════════════════════════════════════════════
+// HEX GRID – 24 territories in a proper hex layout
+// Using flat-top hexagons, offset grid
+// ═══════════════════════════════════════════════════════════════
+const R = 50;  // hex outer radius
+const W = R * 2;
+const H = Math.sqrt(3) * R;
 
-  // Row 1 (4 hexes)
-  '4':  [132, 160],
-  '5':  [228, 160],
-  '6':  [324, 160],
-  '7':  [420, 160],
+// Manual positions for a nice 24-hex Catan-like board
+// Arranged as 4-5-6-5-4 rows (total = 24)
+const HEX_POS = (() => {
+  const positions = {};
+  const rows = [
+    { count: 4, ids: [1,2,3,4],          yRow: 0 },
+    { count: 5, ids: [5,6,7,8,9],        yRow: 1 },
+    { count: 6, ids: [10,11,12,13,14,15],yRow: 2 },
+    { count: 5, ids: [16,17,18,19,20],   yRow: 3 },
+    { count: 4, ids: [21,22,23,24],      yRow: 4 },
+  ];
 
-  // Row 2 (5 hexes - middle)
-  '8':  [84,  240],
-  '9':  [180, 240],
-  '10': [276, 240],
-  '11': [372, 240],
-  '12': [468, 240],
+  const cx = 390; // SVG center x
+  const startY = 70;
+  const rowH = H * 0.88;
 
-  // Row 3 (4 hexes)
-  '13': [132, 320],
-  '14': [228, 320],
-  '15': [324, 320],
-  '16': [420, 320],
+  rows.forEach(row => {
+    const totalW = (row.count - 1) * W * 0.87;
+    const startX = cx - totalW / 2;
+    row.ids.forEach((id, i) => {
+      const x = startX + i * W * 0.87;
+      const y = startY + row.yRow * rowH + (row.yRow % 2 === 1 ? 0 : 0);
+      positions[String(id)] = [x, y];
+    });
+  });
+  return positions;
+})();
 
-  // Row 4 (3 hexes - bottom)
-  '17': [180, 400],
-  '18': [276, 400],
-  '19': [372, 400],
+// Resource type to base color
+const RES_COLORS = {
+  wood:  { base: '#2d1e0e', stroke: '#6b4c2a', accent: '#8b6030' },
+  stone: { base: '#252533', stroke: '#5a5a7a', accent: '#707090' },
+  iron:  { base: '#1a2530', stroke: '#4a6070', accent: '#607080' },
 };
 
-// ── Group colors ─────────────────────────────────────────────
 const GROUP_COLORS = {
-  red:    '#c0392b',
-  blue:   '#2980b9',
-  green:  '#27ae60',
-  yellow: '#d4ac0d',
+  red: '#e74c3c', blue: '#2980b9', green: '#27ae60',
+  yellow: '#d4ac0d', purple: '#8e44ad', orange: '#e67e22',
 };
 
-// ── Build hex SVG path ────────────────────────────────────────
-function hexPath(cx, cy, r) {
+// ═══════════════════════════════════════════════════════════════
+// SVG HELPERS
+// ═══════════════════════════════════════════════════════════════
+function hexPts(cx, cy, r) {
   const pts = [];
   for (let i = 0; i < 6; i++) {
-    const a = Math.PI / 180 * (60 * i - 30);
-    pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
+    const a = Math.PI / 3 * i - Math.PI / 6;
+    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
   }
-  return 'M ' + pts.join(' L ') + ' Z';
+  return pts;
+}
+
+function hexPath(cx, cy, r) {
+  return hexPts(cx, cy, r).map((p, i) => `${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z';
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function svgText(x, y, text, attrs = {}) {
+  const el = svgEl('text', { x, y, 'text-anchor': 'middle', 'dominant-baseline': 'middle', ...attrs });
+  el.textContent = text;
+  return el;
+}
+
+// Building SVG shapes (drawn at building locations between hexes)
+function drawBuilding(svg, cx, cy, type, color) {
+  const g = svgEl('g', { transform: `translate(${cx},${cy})` });
+  const c = color || '#ccc';
+
+  if (type === 'outpost') {
+    // Small house shape
+    g.appendChild(svgEl('rect', { x: -7, y: -4, width: 14, height: 10, fill: c, opacity: '0.9', rx: '1' }));
+    const roof = svgEl('polygon', { points: '-9,-4 0,-12 9,-4', fill: c, opacity: '0.7' });
+    g.appendChild(roof);
+    g.appendChild(svgEl('rect', { x: -2, y: 1, width: 4, height: 5, fill: 'rgba(0,0,0,0.4)', rx: '0.5' }));
+  } else if (type === 'tower') {
+    // Tower with battlements
+    g.appendChild(svgEl('rect', { x: -6, y: -12, width: 12, height: 18, fill: c, opacity: '0.9' }));
+    // battlements
+    [-5,-1,3].forEach(bx => {
+      g.appendChild(svgEl('rect', { x: bx, y: -16, width: 3, height: 5, fill: c }));
+    });
+    g.appendChild(svgEl('rect', { x: -2, y: -4, width: 4, height: 6, fill: 'rgba(0,0,0,0.4)' }));
+  } else if (type === 'castle') {
+    // Castle with two towers
+    g.appendChild(svgEl('rect', { x: -10, y: -8, width: 20, height: 14, fill: c, opacity: '0.9' }));
+    [-10,-4,4].forEach(bx => g.appendChild(svgEl('rect', { x: bx, y: -13, width: 3, height: 6, fill: c })));
+    // Left tower
+    g.appendChild(svgEl('rect', { x: -14, y: -14, width: 8, height: 12, fill: c, opacity: '0.85' }));
+    g.appendChild(svgEl('rect', { x: -15, y: -18, width: 10, height: 5, fill: c, opacity: '0.7' }));
+    // Right tower
+    g.appendChild(svgEl('rect', { x: 6, y: -14, width: 8, height: 12, fill: c, opacity: '0.85' }));
+    g.appendChild(svgEl('rect', { x: 5, y: -18, width: 10, height: 5, fill: c, opacity: '0.7' }));
+    // Gate
+    g.appendChild(svgEl('rect', { x: -3, y: -3, width: 6, height: 9, fill: 'rgba(0,0,0,0.5)', rx: '2' }));
+  }
+
+  return g;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Render Map
+// RENDER MAP
 // ═══════════════════════════════════════════════════════════════
 function renderMap(state) {
   const svg = document.getElementById('map-svg');
-
-  // Keep defs, remove old territories
-  const old = svg.querySelectorAll('.territory');
-  old.forEach(el => el.remove());
+  // Remove old territory groups
+  svg.querySelectorAll('.terr-g, .bld-g').forEach(el => el.remove());
 
   const territories = state.territories;
 
+  // Draw territories
   for (const [id, terr] of Object.entries(territories)) {
-    const pos = HEX_POSITIONS[id];
+    const pos = HEX_POS[id];
     if (!pos) continue;
     const [cx, cy] = pos;
+    const resC = RES_COLORS[terr.resourceType] || RES_COLORS.wood;
+    const ownerColor = terr.owner ? (GROUP_COLORS[terr.owner] || '#888') : null;
 
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.classList.add('territory');
-    g.setAttribute('data-id', id);
+    const g = svgEl('g', { class: 'terr-g', 'data-id': id });
 
-    // Base fill based on owner
-    let fill = '#2a2010';
-    if (terr.owner && GROUP_COLORS[terr.owner]) {
-      const c = GROUP_COLORS[terr.owner];
-      fill = hexColorWithAlpha(c, 0.35);
-    }
+    // Background hex
+    const bg = svgEl('path', {
+      d: hexPath(cx, cy, R - 2),
+      fill: ownerColor ? hexAlpha(ownerColor, 0.28) : resC.base,
+      stroke: ownerColor || resC.stroke,
+      'stroke-width': ownerColor ? '2.5' : '1.5',
+    });
+    g.appendChild(bg);
 
-    // Hex background
-    const hex = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    hex.setAttribute('d', hexPath(cx, cy, HEX_R));
-    hex.setAttribute('fill', fill);
-    hex.setAttribute('stroke', terr.owner ? GROUP_COLORS[terr.owner] : 'rgba(197,148,42,0.3)');
-    hex.setAttribute('stroke-width', terr.owner ? '2' : '1');
-    hex.classList.add('territory-hex');
-
-    g.appendChild(hex);
-
-    // Capital spinning ring
+    // Capital glow ring
     if (terr.isCapital) {
-      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      ring.setAttribute('cx', cx);
-      ring.setAttribute('cy', cy);
-      ring.setAttribute('r', HEX_R - 4);
-      ring.classList.add('capital-ring');
+      const ring = svgEl('path', {
+        d: hexPath(cx, cy, R - 5),
+        fill: 'none',
+        stroke: '#c8942a',
+        'stroke-width': '2',
+        'stroke-dasharray': '5,3',
+        opacity: '0.7',
+      });
+      ring.style.animation = 'none'; // We'll animate via JS below
       g.appendChild(ring);
-    }
 
-    // Territory number (large, center)
-    const num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    num.setAttribute('x', cx);
-    num.setAttribute('y', cy - 14);
-    num.classList.add('territory-number');
-    num.textContent = terr.number;
-    g.appendChild(num);
-
-    // Territory label (small)
-    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', cx);
-    label.setAttribute('y', cy + 2);
-    label.classList.add('territory-label');
-    label.style.fontSize = '6.5px';
-    label.textContent = terr.label;
-    g.appendChild(label);
-
-    // Buildings
-    if (terr.buildings.length > 0) {
-      const emojis = terr.buildings.map(b => (state.buildings[b.type]?.emoji || '?')).join('');
-      const bld = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      bld.setAttribute('x', cx);
-      bld.setAttribute('y', cy + 18);
-      bld.classList.add('territory-buildings');
-      bld.textContent = emojis;
-      g.appendChild(bld);
-    }
-
-    // Capital crown
-    if (terr.isCapital) {
-      const crown = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      crown.setAttribute('x', cx + HEX_R - 14);
-      crown.setAttribute('y', cy - HEX_R + 18);
-      crown.style.fontSize = '12px';
-      crown.style.textAnchor = 'middle';
-      crown.textContent = '👑';
+      const crown = svgText(cx + R - 16, cy - R + 14, '👑', { 'font-size': '12', 'dominant-baseline': 'auto' });
       g.appendChild(crown);
     }
 
-    // Territory ID label (small, corner)
-    const idTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    idTxt.setAttribute('x', cx - HEX_R + 10);
-    idTxt.setAttribute('y', cy - HEX_R + 16);
-    idTxt.style.fontSize = '7px';
-    idTxt.style.fill = 'rgba(197,148,42,0.4)';
-    idTxt.style.fontFamily = 'JetBrains Mono, monospace';
-    idTxt.textContent = id;
-    g.appendChild(idTxt);
+    // Resource icon (small, top-left-ish area)
+    const resIcon = { wood: '🪵', stone: '🪨', iron: '⚙️' }[terr.resourceType] || '?';
+    const resT = svgText(cx - R + 14, cy - R + 16, resIcon, { 'font-size': '10', 'dominant-baseline': 'auto' });
+    g.appendChild(resT);
 
-    // Hover events
-    g.addEventListener('mouseenter', (e) => showTooltip(e, id, terr, state));
+    // Territory number (large, center)
+    const numT = svgText(cx, cy - 10, terr.number, {
+      fill: ownerColor ? '#fff' : '#c8942a',
+      'font-size': '14',
+      'font-weight': 'bold',
+      'font-family': 'Courier New, monospace',
+    });
+    g.appendChild(numT);
+
+    // Territory label
+    const lblT = svgText(cx, cy + 7, terr.label, {
+      fill: ownerColor ? 'rgba(255,255,255,0.85)' : 'rgba(200,148,42,0.6)',
+      'font-size': '6.5',
+      'font-family': 'Georgia, serif',
+    });
+    g.appendChild(lblT);
+
+    // ID badge
+    const idT = svgText(cx + R - 11, cy + R - 13, id, {
+      fill: 'rgba(200,148,42,0.35)',
+      'font-size': '7',
+      'font-family': 'Courier New',
+    });
+    g.appendChild(idT);
+
+    // Mouse events
+    g.addEventListener('mouseenter', e => showTooltip(e, id, terr, state));
     g.addEventListener('mouseleave', hideTooltip);
-    g.addEventListener('click', () => selectTerritory(id));
+    g.addEventListener('click', () => onTerritoryClick(id));
+    g.style.cursor = 'pointer';
 
     svg.appendChild(g);
   }
+
+  // Draw buildings ON TOP (at territory centers, offset slightly)
+  for (const [id, terr] of Object.entries(territories)) {
+    const pos = HEX_POS[id];
+    if (!pos || !terr.buildings.length) continue;
+    const [cx, cy] = pos;
+    const ownerColor = terr.owner ? (GROUP_COLORS[terr.owner] || '#ccc') : '#ccc';
+
+    terr.buildings.forEach((bld, i) => {
+      // Position buildings slightly offset if multiple
+      const offsets = [
+        [0, 0],
+        [-12, -6],
+        [12, -6],
+        [0, -20],
+      ];
+      const [ox, oy] = offsets[Math.min(i, 3)];
+      const bldG = drawBuilding(svg, cx + ox, cy - 5 + oy, bld.type, ownerColor);
+      bldG.classList.add('bld-g');
+      bldG.style.filter = `drop-shadow(0 1px 2px rgba(0,0,0,0.7))`;
+      bldG.style.pointerEvents = 'none';
+      svg.appendChild(bldG);
+    });
+  }
 }
 
-function hexColorWithAlpha(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+function hexAlpha(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+function onTerritoryClick(id) {
+  const sel = document.getElementById('build-terr-sel');
+  if (sel) sel.value = id;
+  // Highlight
+  document.querySelectorAll('.terr-g').forEach(g => g.style.opacity = '1');
+  const clicked = document.querySelector(`.terr-g[data-id="${id}"]`);
+  if (clicked) {
+    document.querySelectorAll('.terr-g').forEach(g => {
+      if (g !== clicked) g.style.opacity = '0.7';
+    });
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
-// Tooltip
+// TOOLTIP
 // ═══════════════════════════════════════════════════════════════
 function showTooltip(e, id, terr, state) {
   const tt = document.getElementById('tooltip');
-  const ownerName = terr.owner ? state.groups[terr.owner]?.name : 'Niemand';
-  const bldList = terr.buildings.map(b => {
-    const def = state.buildings[b.type];
-    return `${def?.emoji || ''} ${def?.label || b.type}`;
-  }).join(', ') || 'Keine';
+  const ownerName = terr.owner ? (state.groups[terr.owner]?.name || terr.owner) : 'Niemand';
+  const ownerColor = terr.owner ? GROUP_COLORS[terr.owner] : '#6a5a40';
+  const bldList = terr.buildings.length
+    ? terr.buildings.map(b => state.buildings[b.type]?.label || b.type).join(', ')
+    : 'Keine';
+  const resName = { wood: '🪵 Holz', stone: '🪨 Stein', iron: '⚙️ Eisen' }[terr.resourceType] || terr.resourceType;
 
   tt.innerHTML = `
     <div class="tt-title">${terr.isCapital ? '👑 ' : ''}${terr.label}</div>
-    <div class="tt-bld">Gebäude: ${bldList}</div>
-    <div class="tt-owner" style="color:${terr.owner ? GROUP_COLORS[terr.owner] : '#6a5a40'}">
-      Kontrolliert von: ${ownerName}
-    </div>
-    <div class="tt-bld" style="margin-top:3px;">Würfelzahl: ${terr.number} · ID: ${id}</div>
+    <div class="tt-res">${resName} · Würfelzahl: <b>${terr.number}</b></div>
+    <div class="tt-line" style="color:${ownerColor}">Besitzer: ${ownerName}</div>
+    <div class="tt-line">Gebäude: ${bldList}</div>
+    <div class="tt-line" style="color:#5a4a30">ID: ${id}</div>
   `;
-
   tt.style.display = 'block';
-  tt.style.left = (e.clientX + 12) + 'px';
-  tt.style.top  = (e.clientY + 12) + 'px';
+  tt.style.left = (e.clientX + 14) + 'px';
+  tt.style.top  = (e.clientY + 14) + 'px';
 }
 
 function hideTooltip() {
@@ -729,201 +1206,467 @@ function hideTooltip() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Scoreboard
+// SCOREBOARD
 // ═══════════════════════════════════════════════════════════════
 function renderScoreboard(state) {
-  const list = document.getElementById('scoreboard-list');
-  const groups = Object.entries(state.groups)
+  const el = document.getElementById('scoreboard');
+  const sorted = Object.entries(state.groups)
     .sort((a, b) => b[1].points - a[1].points);
 
-  list.innerHTML = groups.map(([id, g]) => `
-    <div class="group-row ${selectedGroup === id ? 'selected' : ''}" onclick="selectGroup('${id}')">
-      <div class="group-dot" style="background:${g.color};color:${g.color}"></div>
-      <div>
-        <div class="group-name">${g.name}</div>
-        <div class="group-resources">
-          <span class="res-badge"><span class="res-icon">🪵</span>${g.resources.wood ?? 0}</span>
-          <span class="res-badge"><span class="res-icon">🪨</span>${g.resources.stone ?? 0}</span>
+  el.innerHTML = sorted.map(([id, g]) => {
+    const res = g.resources;
+    const isMe = session?.groupId === id;
+    const woodStr = res.wood === '?' ? '?' : res.wood;
+    const stoneStr = res.stone === '?' ? '?' : res.stone;
+    const ironStr = res.iron === '?' ? '?' : res.iron;
+
+    return `<div class="score-row${isMe ? '" style="border-color:'+g.color+';background:'+hexAlpha(g.color,0.08)+'"' : '"'}>
+      <div class="score-dot" style="background:${g.color};box-shadow:0 0 5px ${g.color}"></div>
+      <div style="flex:1">
+        <div class="score-name">${g.name}${!g.joined ? ' <span style="font-size:0.6rem;color:#4a3a20">(noch nicht beigetreten)</span>' : ''}</div>
+        <div class="res-chips">
+          <div class="res-chip">🪵 ${woodStr}</div>
+          <div class="res-chip">🪨 ${stoneStr}</div>
+          <div class="res-chip">⚙️ ${ironStr}</div>
         </div>
       </div>
       <div style="text-align:right">
-        <div class="group-points">${g.points}</div>
-        <div class="group-pts-label">Punkte</div>
+        <div class="score-pts">${g.points}</div>
+        <div class="score-pts-lbl">Pkt.</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUILD SECTION
+// ═══════════════════════════════════════════════════════════════
+function renderBuildSection(state) {
+  const sel = document.getElementById('build-terr-sel');
+  const grid = document.getElementById('bld-grid');
+  const section = document.getElementById('player-build-section');
+
+  // Hide for admin (they use admin panel)
+  if (session?.role === 'admin') {
+    section.style.display = 'none';
+    return;
+  }
+
+  // Populate territory select
+  const prevVal = sel.value;
+  sel.innerHTML = '<option value="">— Territorium wählen —</option>' +
+    Object.entries(state.territories).map(([id, t]) => {
+      const ownerLabel = t.owner ? ` [${state.groups[t.owner]?.name || t.owner}]` : '';
+      const bldLabel = t.buildings.length ? ' ' + t.buildings.map(b =>
+        ({ outpost:'🏠', tower:'🗼', castle:'🏰' })[b.type] || '?'
+      ).join('') : '';
+      return `<option value="${id}">${t.label}${bldLabel}${ownerLabel}</option>`;
+    }).join('');
+  if (prevVal) sel.value = prevVal;
+
+  // Build buttons
+  grid.innerHTML = Object.entries(state.buildings).map(([type, def]) => {
+    const icons = { outpost: '🏠', tower: '🗼', castle: '🏰' };
+    const costStr = Object.entries(def.cost)
+      .filter(([,v]) => v > 0)
+      .map(([k,v]) => `${v}${k==='wood'?'🪵':k==='stone'?'🪨':'⚙️'}`)
+      .join(' ');
+    return `<button class="bld-btn" onclick="doBuild('${type}')">
+      <span class="bld-icon">${icons[type] || '🏗'}</span>
+      ${def.label}
+      <span class="bld-cost">${costStr}</span>
+    </button>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENT LOG
+// ═══════════════════════════════════════════════════════════════
+function renderEvents(state) {
+  const el = document.getElementById('event-list');
+  if (!state.events?.length) {
+    el.innerHTML = '<div class="ev-item"><div class="ev-msg" style="color:#3a2a10">Noch keine Ereignisse.</div></div>';
+    return;
+  }
+  el.innerHTML = state.events.slice(0, 40).map(ev =>
+    `<div class="ev-item">
+      <div class="ev-time">${ev.time}</div>
+      <div class="ev-msg">${ev.message}</div>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN PANEL
+// ═══════════════════════════════════════════════════════════════
+function renderAdminPanel(state) {
+  if (session?.role !== 'admin') return;
+
+  // Dice config
+  document.getElementById('auto-dice-toggle').checked = !!state.autoDice;
+  document.getElementById('dice-interval').value = state.diceIntervalMinutes || 15;
+
+  // Codes display
+  document.getElementById('admin-codes-display').innerHTML =
+    `<b style="color:#6a5a40">Secret Codes:</b><br>` +
+    Object.entries(state.groups).map(([id, g]) =>
+      `<span style="color:${g.color}">${g.name}</span>: <span style="font-family:monospace">...</span>`
+    ).join('<br>');
+
+  // Resource editor
+  const resEd = document.getElementById('res-editor');
+  resEd.innerHTML = Object.entries(state.groups).map(([id, g]) => `
+    <div class="res-group-row">
+      <div class="res-group-dot" style="background:${g.color};box-shadow:0 0 4px ${g.color}"></div>
+      <div class="res-group-name">${g.name}</div>
+      <div class="res-inputs">
+        <div class="res-field">
+          <label>🪵</label>
+          <input class="res-inp" type="number" min="0" id="res-${id}-wood" value="${g.resources.wood ?? 0}"/>
+        </div>
+        <div class="res-field">
+          <label>🪨</label>
+          <input class="res-inp" type="number" min="0" id="res-${id}-stone" value="${g.resources.stone ?? 0}"/>
+        </div>
+        <div class="res-field">
+          <label>⚙️</label>
+          <input class="res-inp" type="number" min="0" id="res-${id}-iron" value="${g.resources.iron ?? 0}"/>
+        </div>
+        <button class="res-save-btn" onclick="saveResources('${id}')">Speichern</button>
       </div>
     </div>
   `).join('');
-}
 
-// ═══════════════════════════════════════════════════════════════
-// Event Log
-// ═══════════════════════════════════════════════════════════════
-function renderEvents(state) {
-  const list = document.getElementById('event-list');
-  if (!state.events || state.events.length === 0) {
-    list.innerHTML = '<div class="event-item"><div class="event-msg" style="color:#4a3a20">Noch keine Ereignisse.</div></div>';
-    return;
-  }
-  list.innerHTML = state.events.slice(0, 30).map(ev => `
-    <div class="event-item">
-      <div class="event-time">${ev.time}</div>
-      <div class="event-msg">${ev.message}</div>
-    </div>
-  `).join('');
-}
+  // Territory table
+  const tbody = document.getElementById('terr-admin-tbody');
+  const resName = { wood: '🪵 Holz', stone: '🪨 Stein', iron: '⚙️ Eisen' };
+  const groupOptions = '<option value="">Niemand</option>' +
+    Object.entries(state.groups).map(([id, g]) =>
+      `<option value="${id}">${g.name}</option>`
+    ).join('');
 
-// ═══════════════════════════════════════════════════════════════
-// Actions
-// ═══════════════════════════════════════════════════════════════
-function renderActions(state) {
-  // Group buttons
-  const btns = document.getElementById('group-btns');
-  btns.innerHTML = Object.entries(state.groups).map(([id, g]) => `
-    <button class="group-btn ${selectedGroup === id ? 'active' : ''}"
-      style="${selectedGroup === id ? `border-color:${g.color};color:${g.color};background:${g.color}22` : ''}"
-      onclick="selectGroup('${id}')">${g.name.split(' ')[1] || g.name}</button>
-  `).join('');
-
-  // Territory select
-  const sel = document.getElementById('territory-sel');
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">— Territorium wählen —</option>' +
-    Object.entries(state.territories).map(([id, t]) => {
-      const ownerLabel = t.owner ? ` [${state.groups[t.owner]?.name}]` : '';
-      const bldLabel = t.buildings.length ? ` ${t.buildings.map(b => state.buildings[b.type]?.emoji || '').join('')}` : '';
-      return `<option value="${id}">${t.label}${bldLabel}${ownerLabel}</option>`;
+  tbody.innerHTML = Object.entries(state.territories).map(([id, t]) => {
+    const bldTags = t.buildings.map((b, i) => {
+      const lbl = state.buildings[b.type]?.label || b.type;
+      return `<span class="bld-tag" title="Klicken zum Entfernen" onclick="adminRemoveBuilding('${id}', ${i})">${lbl} ✕</span>`;
     }).join('');
-  if (prev) sel.value = prev;
 
-  // Build buttons
-  const bldBtns = document.getElementById('build-btns');
-  bldBtns.innerHTML = Object.entries(state.buildings).map(([type, def]) => `
-    <button class="build-btn" onclick="doBuild('${type}')">
-      <span class="emoji">${def.emoji}</span>
-      ${def.label}
-      <span class="cost">🪵${def.cost.wood} 🪨${def.cost.stone}</span>
-    </button>
-  `).join('');
-}
+    const ownerSel = `<select class="terr-owner-sel" onchange="adminSetOwner('${id}', this.value)">
+      ${groupOptions}
+    </select>`;
 
-// ═══════════════════════════════════════════════════════════════
-// Timer
-// ═══════════════════════════════════════════════════════════════
-function updateTimer() {
-  if (!gameState) return;
-  const timerEl = document.getElementById('hdr-timer');
+    const addBld = `<select class="add-bld-sel" onchange="adminAddBuilding('${id}', this.value); this.value=''">
+      <option value="">+ Gebäude</option>
+      ${Object.entries(state.buildings).map(([type, def]) =>
+        `<option value="${type}">${def.label}</option>`
+      ).join('')}
+    </select>`;
 
-  if (gameState.nextRollAt) {
-    const remaining = Math.max(0, gameState.nextRollAt - Date.now());
-    const mins = Math.floor(remaining / 60000);
-    const secs = Math.floor((remaining % 60000) / 1000);
-    timerEl.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-  } else {
-    timerEl.textContent = '—:——';
+    return `<tr>
+      <td style="color:#6a5a40;font-family:monospace">${id}</td>
+      <td style="color:#c8a860;font-size:0.78rem">${t.isCapital ? '👑 ' : ''}${t.label}</td>
+      <td style="font-size:0.72rem">${resName[t.resourceType] || t.resourceType}</td>
+      <td style="font-family:monospace;color:var(--gold)">${t.number}</td>
+      <td id="terr-owner-cell-${id}">${ownerSel}</td>
+      <td>
+        <div class="bld-tags" id="bld-tags-${id}">${bldTags || '<span style="color:#4a3a20;font-size:0.7rem">—</span>'}</div>
+      </td>
+      <td>${addBld}</td>
+    </tr>`;
+  }).join('');
+
+  // Set current owner values
+  for (const [id, t] of Object.entries(state.territories)) {
+    const cell = document.getElementById(`terr-owner-cell-${id}`);
+    if (cell) {
+      const sel = cell.querySelector('select');
+      if (sel) sel.value = t.owner || '';
+    }
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Actions
+// STATE UPDATE
 // ═══════════════════════════════════════════════════════════════
-function selectGroup(id) {
-  selectedGroup = id;
-  renderScoreboard(gameState);
-  renderActions(gameState);
-}
-
-function selectTerritory(id) {
-  const sel = document.getElementById('territory-sel');
-  sel.value = id;
-}
-
-async function doBuild(buildingType) {
-  if (!selectedGroup) return showToast('Bitte zuerst eine Gruppe wählen.', true);
-  const terrId = document.getElementById('territory-sel').value;
-  if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
-
-  try {
-    const res = await fetch(`${API}/api/build`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ group: selectedGroup, territoryId: terrId, buildingType }),
-    });
-    const data = await res.json();
-    if (!res.ok) return showToast(data.error || 'Fehler', true);
-    updateState(data.state);
-    showToast(`${data.state.buildings[buildingType]?.emoji} ${data.state.buildings[buildingType]?.label} gebaut!`);
-  } catch(e) { showToast('Verbindungsfehler', true); }
-}
-
-async function doConquer() {
-  if (!selectedGroup) return showToast('Bitte zuerst eine Gruppe wählen.', true);
-  const terrId = document.getElementById('territory-sel').value;
-  if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
-
-  if (!confirm(`Territorium ${terrId} wirklich erobern?`)) return;
-
-  try {
-    const res = await fetch(`${API}/api/conquer`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ attacker: selectedGroup, territoryId: terrId }),
-    });
-    const data = await res.json();
-    if (!res.ok) return showToast(data.error || 'Fehler', true);
-    updateState(data.state);
-    showToast('⚔️ Territorium erobert!');
-  } catch(e) { showToast('Verbindungsfehler', true); }
-}
-
-async function doRoll() {
-  if (!confirm('Würfeln? (Nur Spielleitung)')) return;
-  try {
-    const res = await fetch(`${API}/api/dice`, { method: 'POST' });
-    const data = await res.json();
-    updateState(data.state);
-    showToast(`🎲 Gewürfelt: ${data.roll}`, false);
-  } catch(e) { showToast('Verbindungsfehler', true); }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// State Management
-// ═══════════════════════════════════════════════════════════════
-function updateState(state) {
+function updateAll(state) {
   gameState = state;
+
+  // Header
+  document.getElementById('hdr-dice').textContent = state.lastDiceRoll ?? '—';
+  document.getElementById('hdr-auto-badge').style.display = state.autoDice ? 'block' : 'none';
+
   renderMap(state);
   renderScoreboard(state);
-  renderActions(state);
+  renderBuildSection(state);
   renderEvents(state);
-  document.getElementById('hdr-dice').textContent = state.lastDiceRoll ?? '—';
+  if (session?.role === 'admin') renderAdminPanel(state);
+}
+
+function updateTimer() {
+  if (!gameState) return;
+  const el = document.getElementById('hdr-timer');
+  if (gameState.nextRollAt) {
+    const rem = Math.max(0, gameState.nextRollAt - Date.now());
+    const m = Math.floor(rem / 60000);
+    const s = Math.floor((rem % 60000) / 1000);
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else {
+    el.textContent = '—:——';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Toast
+// AUTH
 // ═══════════════════════════════════════════════════════════════
-let toastTimer = null;
-function showToast(msg, isError = false) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = isError ? 'error' : '';
-  el.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+async function doLogin() {
+  const code = document.getElementById('login-input').value.trim();
+  if (!code) return;
+
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      document.getElementById('login-error').textContent = data.error || 'Fehler';
+      return;
+    }
+
+    session = { ...data, code };
+    localStorage.setItem('habsburger_session', JSON.stringify(session));
+    startApp();
+  } catch(e) {
+    document.getElementById('login-error').textContent = 'Verbindungsfehler';
+  }
+}
+
+function doLogout() {
+  session = null;
+  localStorage.removeItem('habsburger_session');
+  stopPolling();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-input').value = '';
+  document.getElementById('login-error').textContent = '';
+}
+
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  // Setup header badge
+  const badge = document.getElementById('hdr-player-badge');
+  if (session.role === 'player' && session.groupId) {
+    badge.style.display = 'flex';
+    document.getElementById('hdr-player-name').textContent = session.name;
+    // Set color when state loads
+  } else if (session.role === 'admin') {
+    badge.style.display = 'flex';
+    document.getElementById('hdr-dot').style.background = '#c8942a';
+    document.getElementById('hdr-player-name').textContent = '⚙ Administrator';
+    document.getElementById('admin-tab').style.display = 'block';
+  }
+
+  startPolling();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Polling
+// POLLING
 // ═══════════════════════════════════════════════════════════════
 async function poll() {
+  if (!session) return;
   try {
-    const res = await fetch(`${API}/api/game`);
+    const res = await fetch('/api/game', {
+      headers: { 'x-auth-code': session.code },
+    });
+    if (res.status === 401 || res.status === 403) { doLogout(); return; }
     const state = await res.json();
-    updateState(state);
+    updateAll(state);
+
+    // Update player dot color
+    if (session.role === 'player' && session.groupId && state.groups[session.groupId]) {
+      document.getElementById('hdr-dot').style.background = state.groups[session.groupId].color;
+    }
   } catch(e) { console.warn('Poll failed', e); }
 }
 
-// ── Init ─────────────────────────────────────────────────────
-poll();
-setInterval(poll, 3000);
-setInterval(updateTimer, 1000);
+function startPolling() {
+  poll();
+  pollTimer = setInterval(poll, 3000);
+  uiTimer = setInterval(updateTimer, 1000);
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  if (uiTimer)   { clearInterval(uiTimer);   uiTimer = null; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PLAYER ACTIONS
+// ═══════════════════════════════════════════════════════════════
+async function doBuild(type) {
+  const terrId = document.getElementById('build-terr-sel').value;
+  if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
+
+  try {
+    const res = await apiFetch('/api/build', {
+      method: 'POST',
+      body: { territoryId: terrId, buildingType: type },
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error || 'Fehler', true);
+    updateAll(data.state);
+    showToast(`✅ ${gameState.buildings[type]?.label} gebaut!`);
+  } catch(e) { showToast('Verbindungsfehler', true); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN ACTIONS
+// ═══════════════════════════════════════════════════════════════
+async function saveResources(groupId) {
+  const state = gameState;
+  if (!state) return;
+  const resources = ['wood', 'stone', 'iron'];
+
+  for (const res of resources) {
+    const inp = document.getElementById(`res-${groupId}-${res}`);
+    if (!inp) continue;
+    const val = parseInt(inp.value) || 0;
+
+    const r = await apiFetch('/api/admin/resources', {
+      method: 'POST',
+      body: { groupId, resource: res, value: val },
+    });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.error || 'Fehler', true); return; }
+  }
+
+  showToast(`✅ Ressourcen gespeichert`);
+  // Reload state
+  const r2 = await apiFetch('/api/game');
+  const d2 = await r2.json();
+  updateAll(d2);
+}
+
+async function adminSetOwner(territoryId, newOwner) {
+  const r = await apiFetch('/api/admin/territory', {
+    method: 'POST',
+    body: { territoryId, owner: newOwner || null },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Besitzer geändert');
+}
+
+async function adminAddBuilding(territoryId, buildingType) {
+  if (!buildingType) return;
+  const r = await apiFetch('/api/admin/building', {
+    method: 'POST',
+    body: { territoryId, action: 'add', buildingType },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Gebäude hinzugefügt');
+}
+
+async function adminRemoveBuilding(territoryId, index) {
+  if (!confirm('Gebäude entfernen?')) return;
+  const r = await apiFetch('/api/admin/building', {
+    method: 'POST',
+    body: { territoryId, action: 'remove', index },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Gebäude entfernt');
+}
+
+async function adminDice() {
+  const valInp = document.getElementById('manual-dice-val');
+  const val = valInp ? parseInt(valInp.value) || null : null;
+  const r = await apiFetch('/api/admin/dice', { method: 'POST', body: { value: val } });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast(`🎲 Gewürfelt: ${data.roll}`);
+  if (valInp) valInp.value = '';
+}
+
+async function saveAutoConfig() {
+  const autoDice = document.getElementById('auto-dice-toggle').checked;
+  const intervalMinutes = parseInt(document.getElementById('dice-interval').value) || 15;
+  const r = await apiFetch('/api/admin/dice-config', {
+    method: 'POST',
+    body: { autoDice, intervalMinutes },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Würfel-Konfiguration gespeichert');
+}
+
+async function adminReset() {
+  if (!confirm('SPIEL WIRKLICH ZURÜCKSETZEN? Alle Daten gehen verloren!')) return;
+  if (!confirm('Bist du SICHER? Letzter Schritt!')) return;
+  const r = await apiFetch('/api/admin/reset', { method: 'POST' });
+  const data = await r.json();
+  if (!r.ok) return showToast('Fehler beim Zurücksetzen', true);
+  showToast('✅ Spiel zurückgesetzt');
+  poll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function apiFetch(url, opts = {}) {
+  const { body, ...rest } = opts;
+  return fetch(url, {
+    ...rest,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-code': session?.code || '',
+      ...(opts.headers || {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
+}
+
+let toastT = null;
+function showToast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : '';
+  el.classList.add('show');
+  if (toastT) clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Login on Enter
+document.getElementById('login-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Restore session from localStorage
+(function() {
+  const saved = localStorage.getItem('habsburger_session');
+  if (saved) {
+    try {
+      session = JSON.parse(saved);
+      startApp();
+    } catch(e) {
+      localStorage.removeItem('habsburger_session');
+    }
+  }
+})();
 </script>
 </body>
 </html>

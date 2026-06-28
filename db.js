@@ -4,7 +4,6 @@ const path = require('path');
 const { DEFAULT_STATE } = require('./gameState');
 
 const DB_FILE = path.join(__dirname, 'db.json');
-
 let state = null;
 
 function load() {
@@ -28,9 +27,7 @@ function save() {
   fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2));
 }
 
-function getState() {
-  return state;
-}
+function getState() { return state; }
 
 function setState(newState) {
   state = newState;
@@ -38,30 +35,25 @@ function setState(newState) {
 }
 
 function addEvent(message) {
+  const now = new Date();
   const event = {
-    time: new Date().toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }),
+    time: now.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }),
     timestamp: Date.now(),
     message,
   };
   state.events.unshift(event);
-  if (state.events.length > 50) state.events = state.events.slice(0, 50);
+  if (state.events.length > 80) state.events = state.events.slice(0, 80);
   save();
 }
 
 function recalcPoints() {
   const bldDefs = state.buildings;
-  // Reset points
-  for (const g of Object.keys(state.groups)) {
-    state.groups[g].points = 0;
-  }
-  for (const [tid, territory] of Object.entries(state.territories)) {
-    if (territory.isCapital && territory.owner) {
-      state.groups[territory.owner].points += 10;
-    }
+  for (const g of Object.keys(state.groups)) state.groups[g].points = 0;
+  for (const territory of Object.values(state.territories)) {
+    if (!territory.owner) continue;
+    if (territory.isCapital) state.groups[territory.owner].points += 10;
     for (const bld of territory.buildings) {
-      if (territory.owner) {
-        state.groups[territory.owner].points += (bldDefs[bld.type]?.points || 0);
-      }
+      state.groups[territory.owner].points += (bldDefs[bld.type]?.points || 0);
     }
   }
   save();

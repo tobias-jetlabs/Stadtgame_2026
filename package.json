@@ -1,9 +1,15 @@
 {
   "name": "habsburger-stadtgame",
-  "version": "1.0.0",
-  "description": "Habsburger Stadtgame",
+  "version": "2.0.0",
+  "description": "Habsburger Stadtgame – Echtzeit-Strategiespiel für Altdorf mit Admin/Player-System",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["game", "catan", "stadtgame", "altdorf"],
+  "author": "",
+  "license": ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2"

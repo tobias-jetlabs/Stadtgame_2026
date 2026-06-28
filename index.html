@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Habsburger Stadtgame</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink:       #1a1208;
+    --parchment: #f4ead0;
+    --parchment-dark: #e8d9b0;
+    --parchment-mid:  #eee0c0;
+    --gold:      #c5942a;
+    --gold-light:#e8c060;
+    --red:       #8b2020;
+    --stone:     #8a7a6a;
+    --moss:      #4a6741;
+    --shadow:    rgba(26,18,8,0.18);
+
+    --group-red:    #c0392b;
+    --group-blue:   #2980b9;
+    --group-green:  #27ae60;
+    --group-yellow: #d4ac0d;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ink);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, #2a1a04 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #1a2a04 0%, transparent 60%);
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(180deg, #2a1a04 0%, #1a1208 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 20px rgba(197,148,42,0.4);
+    flex: 1;
+  }
+
+  header h1 span { color: var(--gold); font-weight: 400; }
+
+  .header-dice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(197,148,42,0.1);
+    border: 1px solid rgba(197,148,42,0.3);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    font-size: 0.9rem;
+  }
+
+  .dice-num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .timer {
+    font-size: 0.85rem;
+    color: #a89060;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Layout ── */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    min-height: calc(100vh - 61px);
+  }
+
+  /* ── Map panel ── */
+  .map-panel {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    padding: 20px;
+    background: #1e150a;
+    position: relative;
+  }
+
+  .map-panel h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    opacity: 0.7;
+  }
+
+  #map-svg {
+    width: 100%;
+    max-width: 720px;
+    display: block;
+  }
+
+  .territory {
+    cursor: pointer;
+    transition: filter 0.15s;
+  }
+
+  .territory:hover { filter: brightness(1.15); }
+  .territory:hover .territory-hex { stroke-width: 3; }
+
+  .territory-hex {
+    stroke: rgba(197,148,42,0.4);
+    stroke-width: 1.5;
+    transition: all 0.2s;
+  }
+
+  .territory-label {
+    font-family: 'Cinzel', serif;
+    font-size: 7px;
+    fill: rgba(255,255,255,0.8);
+    text-anchor: middle;
+    pointer-events: none;
+    dominant-baseline: middle;
+  }
+
+  .territory-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    fill: var(--gold-light);
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+  .territory-buildings {
+    font-size: 9px;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+  .capital-ring {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 2;
+    stroke-dasharray: 4,2;
+    opacity: 0.8;
+    animation: spin 20s linear infinite;
+    transform-origin: center;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── Right sidebar ── */
+  .sidebar {
+    grid-column: 2;
+    background: #160f06;
+    border-left: 1px solid rgba(197,148,42,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Scoreboard ── */
+  .scoreboard {
+    padding: 16px;
+    border-bottom: 1px solid rgba(197,148,42,0.15);
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.6;
+    margin-bottom: 10px;
+  }
+
+  .group-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+
+  .group-row:hover { background: rgba(255,255,255,0.06); }
+  .group-row.selected { background: rgba(197,148,42,0.1); border-color: rgba(197,148,42,0.3); }
+
+  .group-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  .group-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--parchment);
+    flex: 1;
+  }
+
+  .group-points {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+
+  .group-pts-label {
+    font-size: 0.65rem;
+    color: #6a5a40;
+  }
+
+  .group-resources {
+    display: flex;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: #a08060;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .res-badge {
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    padding: 2px 5px;
+  }
+
+  .res-badge .res-icon { margin-right: 2px; }
+
+  /* ── Actions panel ── */
+  .actions-panel {
+    padding: 16px;
+    border-bottom: 1px solid rgba(197,148,42,0.15);
+  }
+
+  .action-group-select {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .group-btn {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #a08060;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .group-btn:hover { background: rgba(255,255,255,0.08); }
+  .group-btn.active { color: #fff; font-weight: 600; }
+
+  .territory-select {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(197,148,42,0.2);
+    color: var(--parchment);
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-family: 'Lora', serif;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    appearance: none;
+  }
+
+  .territory-select option { background: #1a1208; }
+
+  .build-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .build-btn {
+    padding: 8px 4px;
+    border: 1px solid rgba(197,148,42,0.25);
+    background: rgba(197,148,42,0.06);
+    color: var(--gold-light);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    text-align: center;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+
+  .build-btn:hover { background: rgba(197,148,42,0.15); border-color: var(--gold); }
+
+  .build-btn .emoji { display: block; font-size: 1.1rem; margin-bottom: 3px; }
+  .build-btn .cost { display: block; font-size: 0.6rem; color: #8a7a5a; margin-top: 2px; }
+
+  .conquer-btn {
+    width: 100%;
+    padding: 9px;
+    background: rgba(139,32,32,0.2);
+    border: 1px solid rgba(139,32,32,0.4);
+    color: #e08080;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    transition: all 0.15s;
+    margin-bottom: 6px;
+  }
+
+  .conquer-btn:hover { background: rgba(139,32,32,0.35); border-color: #c04040; }
+
+  .dice-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, rgba(197,148,42,0.2), rgba(197,148,42,0.1));
+    border: 1px solid rgba(197,148,42,0.4);
+    color: var(--gold-light);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .dice-btn:hover {
+    background: linear-gradient(135deg, rgba(197,148,42,0.35), rgba(197,148,42,0.2));
+    box-shadow: 0 0 14px rgba(197,148,42,0.25);
+  }
+
+  /* ── Event log ── */
+  .event-log {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .event-item {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.75rem;
+    color: #9a8a6a;
+    line-height: 1.4;
+  }
+
+  .event-time {
+    color: #6a5a40;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .event-msg { color: #b0a080; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #2a1a04;
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.error { border-color: #c04040; color: #e08080; }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed;
+    background: #1a1208;
+    border: 1px solid rgba(197,148,42,0.4);
+    color: var(--parchment);
+    padding: 10px 14px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    z-index: 200;
+    display: none;
+    max-width: 200px;
+    line-height: 1.5;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+
+  #tooltip .tt-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+
+  #tooltip .tt-owner { margin-top: 4px; font-size: 0.75rem; }
+  #tooltip .tt-bld { font-size: 0.75rem; color: #9a8a6a; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+  ::-webkit-scrollbar-thumb { background: rgba(197,148,42,0.25); border-radius: 3px; }
+
+  @media (max-width: 800px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+    .sidebar { grid-column: 1; max-height: 60vh; overflow-y: auto; }
+    .map-panel { grid-row: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏰 Habsburger <span>Stadtgame</span></h1>
+  <div class="header-dice">
+    <div>
+      <div class="dice-num" id="hdr-dice">—</div>
+      <div style="font-size:0.65rem;color:#6a5a40;">Letzter Wurf</div>
+    </div>
+    <div>
+      <div class="timer" id="hdr-timer">—:——</div>
+      <div style="font-size:0.65rem;color:#6a5a40;">Nächster</div>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ── Map ── -->
+  <div class="map-panel">
+    <h2>Karte von Altdorf</h2>
+    <svg id="map-svg" viewBox="0 0 720 560" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <pattern id="bg-pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+          <circle cx="10" cy="10" r="0.5" fill="rgba(197,148,42,0.1)"/>
+        </pattern>
+      </defs>
+      <rect width="720" height="560" fill="url(#bg-pattern)"/>
+      <!-- Territories will be drawn by JS -->
+    </svg>
+  </div>
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+
+    <!-- Scoreboard -->
+    <div class="scoreboard">
+      <div class="section-title">⚔ Rangliste</div>
+      <div id="scoreboard-list"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-panel">
+      <div class="section-title">⚒ Aktionen</div>
+
+      <div class="action-group-select" id="group-btns"></div>
+
+      <select class="territory-select" id="territory-sel">
+        <option value="">— Territorium wählen —</option>
+      </select>
+
+      <div class="build-buttons" id="build-btns"></div>
+
+      <button class="conquer-btn" onclick="doConquer()">⚔️ Territorium erobern</button>
+      <button class="dice-btn" onclick="doRoll()">🎲 Würfeln (Spielleitung)</button>
+    </div>
+
+    <!-- Event log -->
+    <div class="event-log">
+      <div class="section-title">📜 Ereignisse</div>
+      <div id="event-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Config
+// ═══════════════════════════════════════════════════════════════
+const API = '';  // same origin
+let gameState = null;
+let selectedGroup = null;
+
+// ── Hex grid layout ──────────────────────────────────────────
+// Offset hex positions for 19 territories in a Catan-like layout
+const HEX_R = 46;  // outer radius
+const HEX_POSITIONS = {
+  // Row 0 (top, 3 hexes)
+  '1':  [180, 80],
+  '2':  [276, 80],
+  '3':  [372, 80],
+
+  // Row 1 (4 hexes)
+  '4':  [132, 160],
+  '5':  [228, 160],
+  '6':  [324, 160],
+  '7':  [420, 160],
+
+  // Row 2 (5 hexes - middle)
+  '8':  [84,  240],
+  '9':  [180, 240],
+  '10': [276, 240],
+  '11': [372, 240],
+  '12': [468, 240],
+
+  // Row 3 (4 hexes)
+  '13': [132, 320],
+  '14': [228, 320],
+  '15': [324, 320],
+  '16': [420, 320],
+
+  // Row 4 (3 hexes - bottom)
+  '17': [180, 400],
+  '18': [276, 400],
+  '19': [372, 400],
+};
+
+// ── Group colors ─────────────────────────────────────────────
+const GROUP_COLORS = {
+  red:    '#c0392b',
+  blue:   '#2980b9',
+  green:  '#27ae60',
+  yellow: '#d4ac0d',
+};
+
+// ── Build hex SVG path ────────────────────────────────────────
+function hexPath(cx, cy, r) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 180 * (60 * i - 30);
+    pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
+  }
+  return 'M ' + pts.join(' L ') + ' Z';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Render Map
+// ═══════════════════════════════════════════════════════════════
+function renderMap(state) {
+  const svg = document.getElementById('map-svg');
+
+  // Keep defs, remove old territories
+  const old = svg.querySelectorAll('.territory');
+  old.forEach(el => el.remove());
+
+  const territories = state.territories;
+
+  for (const [id, terr] of Object.entries(territories)) {
+    const pos = HEX_POSITIONS[id];
+    if (!pos) continue;
+    const [cx, cy] = pos;
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.classList.add('territory');
+    g.setAttribute('data-id', id);
+
+    // Base fill based on owner
+    let fill = '#2a2010';
+    if (terr.owner && GROUP_COLORS[terr.owner]) {
+      const c = GROUP_COLORS[terr.owner];
+      fill = hexColorWithAlpha(c, 0.35);
+    }
+
+    // Hex background
+    const hex = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    hex.setAttribute('d', hexPath(cx, cy, HEX_R));
+    hex.setAttribute('fill', fill);
+    hex.setAttribute('stroke', terr.owner ? GROUP_COLORS[terr.owner] : 'rgba(197,148,42,0.3)');
+    hex.setAttribute('stroke-width', terr.owner ? '2' : '1');
+    hex.classList.add('territory-hex');
+
+    g.appendChild(hex);
+
+    // Capital spinning ring
+    if (terr.isCapital) {
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring.setAttribute('cx', cx);
+      ring.setAttribute('cy', cy);
+      ring.setAttribute('r', HEX_R - 4);
+      ring.classList.add('capital-ring');
+      g.appendChild(ring);
+    }
+
+    // Territory number (large, center)
+    const num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    num.setAttribute('x', cx);
+    num.setAttribute('y', cy - 14);
+    num.classList.add('territory-number');
+    num.textContent = terr.number;
+    g.appendChild(num);
+
+    // Territory label (small)
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', cx);
+    label.setAttribute('y', cy + 2);
+    label.classList.add('territory-label');
+    label.style.fontSize = '6.5px';
+    label.textContent = terr.label;
+    g.appendChild(label);
+
+    // Buildings
+    if (terr.buildings.length > 0) {
+      const emojis = terr.buildings.map(b => (state.buildings[b.type]?.emoji || '?')).join('');
+      const bld = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      bld.setAttribute('x', cx);
+      bld.setAttribute('y', cy + 18);
+      bld.classList.add('territory-buildings');
+      bld.textContent = emojis;
+      g.appendChild(bld);
+    }
+
+    // Capital crown
+    if (terr.isCapital) {
+      const crown = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      crown.setAttribute('x', cx + HEX_R - 14);
+      crown.setAttribute('y', cy - HEX_R + 18);
+      crown.style.fontSize = '12px';
+      crown.style.textAnchor = 'middle';
+      crown.textContent = '👑';
+      g.appendChild(crown);
+    }
+
+    // Territory ID label (small, corner)
+    const idTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    idTxt.setAttribute('x', cx - HEX_R + 10);
+    idTxt.setAttribute('y', cy - HEX_R + 16);
+    idTxt.style.fontSize = '7px';
+    idTxt.style.fill = 'rgba(197,148,42,0.4)';
+    idTxt.style.fontFamily = 'JetBrains Mono, monospace';
+    idTxt.textContent = id;
+    g.appendChild(idTxt);
+
+    // Hover events
+    g.addEventListener('mouseenter', (e) => showTooltip(e, id, terr, state));
+    g.addEventListener('mouseleave', hideTooltip);
+    g.addEventListener('click', () => selectTerritory(id));
+
+    svg.appendChild(g);
+  }
+}
+
+function hexColorWithAlpha(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Tooltip
+// ═══════════════════════════════════════════════════════════════
+function showTooltip(e, id, terr, state) {
+  const tt = document.getElementById('tooltip');
+  const ownerName = terr.owner ? state.groups[terr.owner]?.name : 'Niemand';
+  const bldList = terr.buildings.map(b => {
+    const def = state.buildings[b.type];
+    return `${def?.emoji || ''} ${def?.label || b.type}`;
+  }).join(', ') || 'Keine';
+
+  tt.innerHTML = `
+    <div class="tt-title">${terr.isCapital ? '👑 ' : ''}${terr.label}</div>
+    <div class="tt-bld">Gebäude: ${bldList}</div>
+    <div class="tt-owner" style="color:${terr.owner ? GROUP_COLORS[terr.owner] : '#6a5a40'}">
+      Kontrolliert von: ${ownerName}
+    </div>
+    <div class="tt-bld" style="margin-top:3px;">Würfelzahl: ${terr.number} · ID: ${id}</div>
+  `;
+
+  tt.style.display = 'block';
+  tt.style.left = (e.clientX + 12) + 'px';
+  tt.style.top  = (e.clientY + 12) + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Scoreboard
+// ═══════════════════════════════════════════════════════════════
+function renderScoreboard(state) {
+  const list = document.getElementById('scoreboard-list');
+  const groups = Object.entries(state.groups)
+    .sort((a, b) => b[1].points - a[1].points);
+
+  list.innerHTML = groups.map(([id, g]) => `
+    <div class="group-row ${selectedGroup === id ? 'selected' : ''}" onclick="selectGroup('${id}')">
+      <div class="group-dot" style="background:${g.color};color:${g.color}"></div>
+      <div>
+        <div class="group-name">${g.name}</div>
+        <div class="group-resources">
+          <span class="res-badge"><span class="res-icon">🪵</span>${g.resources.wood ?? 0}</span>
+          <span class="res-badge"><span class="res-icon">🪨</span>${g.resources.stone ?? 0}</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="group-points">${g.points}</div>
+        <div class="group-pts-label">Punkte</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Event Log
+// ═══════════════════════════════════════════════════════════════
+function renderEvents(state) {
+  const list = document.getElementById('event-list');
+  if (!state.events || state.events.length === 0) {
+    list.innerHTML = '<div class="event-item"><div class="event-msg" style="color:#4a3a20">Noch keine Ereignisse.</div></div>';
+    return;
+  }
+  list.innerHTML = state.events.slice(0, 30).map(ev => `
+    <div class="event-item">
+      <div class="event-time">${ev.time}</div>
+      <div class="event-msg">${ev.message}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Actions
+// ═══════════════════════════════════════════════════════════════
+function renderActions(state) {
+  // Group buttons
+  const btns = document.getElementById('group-btns');
+  btns.innerHTML = Object.entries(state.groups).map(([id, g]) => `
+    <button class="group-btn ${selectedGroup === id ? 'active' : ''}"
+      style="${selectedGroup === id ? `border-color:${g.color};color:${g.color};background:${g.color}22` : ''}"
+      onclick="selectGroup('${id}')">${g.name.split(' ')[1] || g.name}</button>
+  `).join('');
+
+  // Territory select
+  const sel = document.getElementById('territory-sel');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Territorium wählen —</option>' +
+    Object.entries(state.territories).map(([id, t]) => {
+      const ownerLabel = t.owner ? ` [${state.groups[t.owner]?.name}]` : '';
+      const bldLabel = t.buildings.length ? ` ${t.buildings.map(b => state.buildings[b.type]?.emoji || '').join('')}` : '';
+      return `<option value="${id}">${t.label}${bldLabel}${ownerLabel}</option>`;
+    }).join('');
+  if (prev) sel.value = prev;
+
+  // Build buttons
+  const bldBtns = document.getElementById('build-btns');
+  bldBtns.innerHTML = Object.entries(state.buildings).map(([type, def]) => `
+    <button class="build-btn" onclick="doBuild('${type}')">
+      <span class="emoji">${def.emoji}</span>
+      ${def.label}
+      <span class="cost">🪵${def.cost.wood} 🪨${def.cost.stone}</span>
+    </button>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Timer
+// ═══════════════════════════════════════════════════════════════
+function updateTimer() {
+  if (!gameState) return;
+  const timerEl = document.getElementById('hdr-timer');
+
+  if (gameState.nextRollAt) {
+    const remaining = Math.max(0, gameState.nextRollAt - Date.now());
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    timerEl.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  } else {
+    timerEl.textContent = '—:——';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Actions
+// ═══════════════════════════════════════════════════════════════
+function selectGroup(id) {
+  selectedGroup = id;
+  renderScoreboard(gameState);
+  renderActions(gameState);
+}
+
+function selectTerritory(id) {
+  const sel = document.getElementById('territory-sel');
+  sel.value = id;
+}
+
+async function doBuild(buildingType) {
+  if (!selectedGroup) return showToast('Bitte zuerst eine Gruppe wählen.', true);
+  const terrId = document.getElementById('territory-sel').value;
+  if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
+
+  try {
+    const res = await fetch(`${API}/api/build`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ group: selectedGroup, territoryId: terrId, buildingType }),
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error || 'Fehler', true);
+    updateState(data.state);
+    showToast(`${data.state.buildings[buildingType]?.emoji} ${data.state.buildings[buildingType]?.label} gebaut!`);
+  } catch(e) { showToast('Verbindungsfehler', true); }
+}
+
+async function doConquer() {
+  if (!selectedGroup) return showToast('Bitte zuerst eine Gruppe wählen.', true);
+  const terrId = document.getElementById('territory-sel').value;
+  if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
+
+  if (!confirm(`Territorium ${terrId} wirklich erobern?`)) return;
+
+  try {
+    const res = await fetch(`${API}/api/conquer`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ attacker: selectedGroup, territoryId: terrId }),
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error || 'Fehler', true);
+    updateState(data.state);
+    showToast('⚔️ Territorium erobert!');
+  } catch(e) { showToast('Verbindungsfehler', true); }
+}
+
+async function doRoll() {
+  if (!confirm('Würfeln? (Nur Spielleitung)')) return;
+  try {
+    const res = await fetch(`${API}/api/dice`, { method: 'POST' });
+    const data = await res.json();
+    updateState(data.state);
+    showToast(`🎲 Gewürfelt: ${data.roll}`, false);
+  } catch(e) { showToast('Verbindungsfehler', true); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// State Management
+// ═══════════════════════════════════════════════════════════════
+function updateState(state) {
+  gameState = state;
+  renderMap(state);
+  renderScoreboard(state);
+  renderActions(state);
+  renderEvents(state);
+  document.getElementById('hdr-dice').textContent = state.lastDiceRoll ?? '—';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Toast
+// ═══════════════════════════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = isError ? 'error' : '';
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Polling
+// ═══════════════════════════════════════════════════════════════
+async function poll() {
+  try {
+    const res = await fetch(`${API}/api/game`);
+    const state = await res.json();
+    updateState(state);
+  } catch(e) { console.warn('Poll failed', e); }
+}
+
+// ── Init ─────────────────────────────────────────────────────
+poll();
+setInterval(poll, 3000);
+setInterval(updateTimer, 1000);
+</script>
+</body>
+</html>

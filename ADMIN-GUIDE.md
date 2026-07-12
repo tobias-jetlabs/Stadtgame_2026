@@ -93,7 +93,7 @@ Pro Gruppe drei Eingabefelder für:
 **Ablauf:**
 1. Zahlen eingeben
 2. "Speichern" klicken
-3. Alle Spieler sehen sofort die neuen Werte (außer andere Gruppen sehen "?")
+3. Alle Spieler sehen sofort die neuen Werte (für alle Gruppen sichtbar)
 
 **Usecase:** Initialisierung, Sanktionen, Fehlerkorrektur
 
@@ -110,15 +110,17 @@ Spalten:
 - Dropdown "Besitzer" klicken
 - Gruppe wählen oder "Niemand"
 - Territory wird sofort neu eingefärbt
+- **Wichtig:** Nur der Admin vergibt Gebietsbesitz. Spieler können sich kein Gebiet selbst nehmen — erst wenn du hier eine Gruppe zuweist, darf diese Gruppe dort im Spieler-Tab bauen.
 
 **Gebäude verwalten:**
 - Bestehende Gebäude: Tag anklicken → entfernt
 - Neues Gebäude: "Gebäude" Dropdown → Typ wählen
+- Über diese Admin-Tabelle kannst du (im Gegensatz zu Spielern) auch mehrere Gebäude auf ein Gebiet setzen
 
-**Beispiel: Gruppe Rot kontrolliert Territorium 5**
-1. Dropdown "Besitzer" auf "Gruppe Rot"
-2. Tab "Vorposten" hinzufügen
-3. Nächster Würfelwurf: Gruppe Rot bekam +1 Stein (falls Zahl 4)
+**Beispiel: Gruppe Rot soll Territorium 5 bekommen**
+1. Dropdown "Besitzer" auf "Gruppe Rot" setzen
+2. Gruppe Rot kann nun im Spieler-Tab auf Territorium 5 ein Gebäude bauen (solange keins vorhanden ist)
+3. Nächster Würfelwurf: Gruppe Rot bekommt +1 Stein pro Gebäude (falls Zahl 4)
 
 ---
 
@@ -167,7 +169,7 @@ Rechts im Spielfeld-Tab, "📜 Ereignisse":
 "⚔ Rangliste" zeigt aktuelle Punkte aller Gruppen
 
 ### Ressourcen überprüfen
-Admin sieht **exakte** Zahlen (nicht "?")
+Ressourcen aller Gruppen sind für Admin **und** alle Spieler als exakte Zahlen sichtbar.
 
 ---
 
@@ -226,6 +228,7 @@ cp db.json db.json.backup-$(date +%s)
 - **Auto-Dice:** Wird beim Start neu gestartet
 
 ### Ports ändern
+Standardport ist 3001. Die App läuft immer unter dem Pfad `/stadtgame`.
 ```bash
 PORT=8080 npm start
 ```
@@ -257,8 +260,11 @@ A: Auto-Dice pausiert. Nur manuelle Würfe funktionieren.
 **F: Wie viele Gruppen sind möglich?**
 A: Im Default: 6 (rot, blau, grün, gelb, lila, orange). Mehr im Code hinzufügbar.
 
-**F: Spieler sehen "?" bei anderen Ressourcen — absicht?**
-A: Ja! Geheimnis halten. Nur Admin und die Gruppe selbst sehen echte Zahlen.
+**F: Sehen Spieler die Ressourcen anderer Gruppen?**
+A: Ja, alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
+
+**F: Können Spieler sich selbst ein Gebiet nehmen?**
+A: Nein. Nur der Admin vergibt Gebietsbesitz (Territorien-Tabelle). Spieler dürfen dann auf ihren zugewiesenen, noch unbebauten Gebieten selbst bauen.
 
 ---
 

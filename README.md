@@ -10,7 +10,7 @@ npm install
 
 # Server starten
 npm start
-# → http://localhost:3000
+# → http://localhost:3001/stadtgame
 ```
 
 Browser öffnen, Secret Code eingeben → Spielfeld sehen!
@@ -42,9 +42,9 @@ orange:  ORANGE-WOLF-31
 
 ### 🎮 SPIELER
 - ✅ Spielfeld ansehen (live mit anderen Spielern)
-- ✅ Eigene Ressourcen sehen (Holz, Stein, Eisen)
-- ✅ Gebäude auf eigenen Territorien bauen (wenn Ressourcen reichen)
-- ❌ Ressourcen anderer Gruppen sehen (werden als "?" angezeigt)
+- ✅ Ressourcen aller Gruppen sehen (Holz, Stein, Eisen)
+- ✅ Gebäude auf eigenen Territorien bauen (nur wenn vom Admin zugewiesen, noch kein Gebäude vorhanden, und Ressourcen reichen)
+- ❌ Territorien selbst beanspruchen (Besitz vergibt nur der Admin)
 - ❌ Territorien erobern / übertragen
 - ❌ Würfeln
 - ❌ Konfiguration ändern
@@ -66,9 +66,9 @@ orange:  ORANGE-WOLF-31
 **Layout:** 4–5–6–5–4 Hex-Ringe
 
 ### Ressourcentypen
-- **Holz** (🪵) – Innenfelder (häufig, Nummern 6,8)
-- **Stein** (🪨) – Mittlere Ringe (Nummern 4,10)
-- **Eisen** (⚙️) – Randfelder (seltener, Nummern 2,3,11,12)
+- **Holz** (🪵) – 10 Felder, Innen-/Mittelringe (häufig)
+- **Stein** (🪨) – 8 Felder, Mittelringe (häufig)
+- **Eisen** (⚙️) – 6 Felder, ausschliesslich am Spielfeldrand (seltener)
 
 **Habsburg Burg (Territorium 24)** – Die Hauptstadt, 10 VP wenn kontrolliert!
 
@@ -101,20 +101,21 @@ Wenn die Würfelzahl fällt:
 
 ## 🌐 API
 
+Basis-Pfad: `/stadtgame` (z.B. `https://raspberry-pi-server.taila81f99.ts.net/stadtgame`)
 Alle Requests brauchen Header: `x-auth-code: <SECRET>`
 
 ### Public Endpoints
 
 #### Login / Identifizierung
 ```
-POST /api/auth
+POST /stadtgame/api/auth
 { "code": "ROT-ADLER-77" }
 → { role: "player", groupId: "red", name: "Gruppe Rot" }
 ```
 
 #### Spielfeld abrufen
 ```
-GET /api/game
+GET /stadtgame/api/game
 → Vollständiger Spielstatus (Territorien, Gruppen, Ressourcen, Events)
 ```
 
@@ -122,46 +123,47 @@ GET /api/game
 
 #### Gebäude bauen
 ```
-POST /api/build
+POST /stadtgame/api/build
 { "territoryId": "5", "buildingType": "outpost" }
 ```
+Funktioniert nur, wenn das Territorium bereits vom Admin der eigenen Gruppe zugewiesen wurde und noch kein Gebäude darauf steht.
 
 ### Admin Endpoints
 
 #### Ressourcen anpassen
 ```
-POST /api/admin/resources
+POST /stadtgame/api/admin/resources
 { "groupId": "red", "resource": "wood", "value": 50 }
 ```
 
 #### Territorium-Besitzer ändern
 ```
-POST /api/admin/territory
+POST /stadtgame/api/admin/territory
 { "territoryId": "5", "owner": "red" }
 ```
 
 #### Gebäude hinzufügen/entfernen
 ```
-POST /api/admin/building
+POST /stadtgame/api/admin/building
 { "territoryId": "5", "action": "add", "buildingType": "castle" }
 { "territoryId": "5", "action": "remove", "index": 0 }
 ```
 
 #### Würfeln (manuell)
 ```
-POST /api/admin/dice
+POST /stadtgame/api/admin/dice
 { "value": 8 }  // optional; zufällig wenn nicht angegeben
 ```
 
 #### Auto-Dice konfigurieren
 ```
-POST /api/admin/dice-config
+POST /stadtgame/api/admin/dice-config
 { "autoDice": true, "intervalMinutes": 20 }
 ```
 
 #### Spiel zurücksetzen
 ```
-POST /api/admin/reset
+POST /stadtgame/api/admin/reset
 ```
 
 ---
@@ -188,7 +190,7 @@ Codes sind dann für die Dauer des Spiels fixiert. Sie ändern sich nicht.
 ### Lokal (Entwicklung)
 ```bash
 npm start
-# http://localhost:3000
+# http://localhost:3001/stadtgame
 ```
 
 ### VPS / Production (mit PM2)
@@ -199,14 +201,17 @@ pm2 save
 pm2 startup
 ```
 
+Der Server hört auf Port 3001 und stellt die gesamte App (Frontend + API) unter
+dem Pfad `/stadtgame` bereit — z.B. `https://raspberry-pi-server.taila81f99.ts.net/stadtgame`.
+
 Nginx-Reverse-Proxy (Empfohlen):
 ```nginx
 server {
   listen 80;
-  server_name example.com;
+  server_name raspberry-pi-server.taila81f99.ts.net;
 
-  location / {
-    proxy_pass http://localhost:3000;
+  location /stadtgame {
+    proxy_pass http://localhost:3001;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';
@@ -240,9 +245,9 @@ server {
 ### Ressourcen-Updates bei anderen Spielern nicht sichtbar?
 → Frontend polled alle 3 Sekunden. Browser-Cache evtl. leeren.
 
-### Port 3000 schon in Benutzung?
+### Port 3001 schon in Benutzung?
 ```bash
-PORT=3001 npm start
+PORT=4000 npm start
 ```
 
 ---

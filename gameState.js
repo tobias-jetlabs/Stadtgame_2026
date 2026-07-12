@@ -13,11 +13,11 @@ const GROUP_CODES = {
 };
 
 // ─── Territory layout ─────────────────────────────────────────────────────────
-// 24 territories in a hex grid (5-row Catan-style: 3-4-5-4-3 + corner + edge rows)
-// Resource distribution:
-//   Holz (wood) → inner territories, numbers 5,6,8,9
-//   Stein (stone) → mid ring, numbers 4,10
-//   Eisen (iron) → outer/edge territories, numbers 2,3,11,12
+// 24 territories in a hex grid (5-row Catan-style: 4-5-6-5-4)
+// Resource distribution (Holz/Stein häufiger, Eisen am Spielfeldrand):
+//   Holz (wood)   → 10 Felder, mittlere/innere Zeilen
+//   Stein (stone) → 8 Felder, Zeilen 1/3 + 2 Streufelder
+//   Eisen (iron)  → 6 Felder, ausschliesslich in den äusseren Randzeilen (0 + 5)
 //
 // Numbers 2–12 (2d6 distribution), each appears once or twice:
 //   Most common: 6,8 (5/36), then 5,9 (4/36), then 4,10 (3/36), 3,11 (2/36), 2,12 (1/36)
@@ -60,7 +60,7 @@ const DEFAULT_STATE = {
     '12': { number: 9,  label: 'Sägewerk',       resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [8, 11, 16],    isCapital: false },
 
     // ── Row 3 – inner ring (Holz, most productive) ──
-    '13': { number: 6,  label: 'Marktplatz',     resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [9, 14, 17],    isCapital: false },
+    '13': { number: 6,  label: 'Marktplatz',     resourceType: 'stone', owner: null, buildings: [], adjacentTo: [9, 14, 17],    isCapital: false },
     '14': { number: 8,  label: 'Rathausplatz',   resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [10, 13, 15, 18],isCapital: false },
     '15': { number: 6,  label: 'Waffenschmiede', resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [11, 14, 16, 19],isCapital: false },
     '16': { number: 8,  label: 'Kräutergarten',  resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [12, 15, 20],   isCapital: false },
@@ -69,7 +69,7 @@ const DEFAULT_STATE = {
     '17': { number: 6,  label: 'Burghügel',      resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [13, 18, 21],   isCapital: false },
     '18': { number: 8,  label: 'Fischergasse',   resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [14, 17, 19, 22],isCapital: false },
     '19': { number: 8,  label: 'Mühlbach',       resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [15, 18, 20, 23],isCapital: false },
-    '20': { number: 6,  label: 'Klostergasse',   resourceType: 'wood',  owner: null, buildings: [], adjacentTo: [16, 19, 24],   isCapital: false },
+    '20': { number: 6,  label: 'Klostergasse',   resourceType: 'stone', owner: null, buildings: [], adjacentTo: [16, 19, 24],   isCapital: false },
 
     // ── Row 5 – south outer ring (Stein + Eisen) ──
     '21': { number: 3,  label: 'Südtor',         resourceType: 'iron',  owner: null, buildings: [], adjacentTo: [17, 22],       isCapital: false },

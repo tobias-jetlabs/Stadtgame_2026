@@ -6,11 +6,14 @@ const db = require('./db');
 const { DEFAULT_STATE, ADMIN_CODE, GROUP_CODES } = require('./gameState');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
+const BASE_PATH = '/stadtgame';
 
+const router = express.Router();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(BASE_PATH, router);
+router.use(express.static(path.join(__dirname, 'public')));
 
 db.load();
 
@@ -107,7 +110,7 @@ function adminOnly(req, res, next) {
 // ─── Public routes ────────────────────────────────────────────────────────────
 
 // Login / identify
-app.post('/api/auth', (req, res) => {
+router.post('/api/auth', (req, res) => {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'Kein Code angegeben' });
 
@@ -135,32 +138,20 @@ app.post('/api/auth', (req, res) => {
   return res.status(403).json({ error: 'Ungültiger Code' });
 });
 
-// GET game state (public, but strip other groups' resources for players)
-app.get('/api/game', authMiddleware, (req, res) => {
+// GET game state (all groups' resources are visible to everyone)
+router.get('/api/game', authMiddleware, (req, res) => {
   const state = db.getState();
 
   if (req.role === 'admin') {
-    return res.json({ ...state, role: 'admin' });
+    return res.json({ ...state, role: 'admin', groupCodes: GROUP_CODES });
   }
 
-  // For players: hide other groups' exact resources (show totals only)
-  const playerView = JSON.parse(JSON.stringify(state));
-  playerView.role = 'player';
-  playerView.myGroupId = req.groupId;
-
-  // Other groups: hide exact resources
-  for (const [gid, g] of Object.entries(playerView.groups)) {
-    if (gid !== req.groupId) {
-      g.resources = { wood: '?', stone: '?', iron: '?' };
-    }
-  }
-
-  return res.json(playerView);
+  return res.json({ ...state, role: 'player', myGroupId: req.groupId });
 });
 
 // ─── Player routes ────────────────────────────────────────────────────────────
 
-app.post('/api/build', authMiddleware, (req, res) => {
+router.post('/api/build', authMiddleware, (req, res) => {
   const { territoryId, buildingType } = req.body;
   const state = db.getState();
   const groupId = req.role === 'admin' ? req.body.group : req.groupId;
@@ -173,14 +164,14 @@ app.post('/api/build', authMiddleware, (req, res) => {
   const group = state.groups[groupId];
   const bldDef = state.buildings[buildingType];
 
-  // Players can only build on their own territories or unclaimed
-  if (req.role === 'player' && territory.owner && territory.owner !== groupId) {
-    return res.status(403).json({ error: 'Dieses Territorium gehört einer anderen Gruppe' });
+  // Players can only build on territories the admin has already assigned to them
+  if (req.role === 'player' && territory.owner !== groupId) {
+    return res.status(403).json({ error: 'Dieses Gebiet gehört dir nicht. Der Admin muss es dir zuerst zuweisen.' });
   }
 
-  // Players can only build if no existing buildings, or it's their territory
-  if (req.role === 'player' && territory.buildings.length > 0 && territory.owner !== groupId) {
-    return res.status(403).json({ error: 'Territorium bereits besetzt' });
+  // Players can only build if the territory has no building yet
+  if (req.role === 'player' && territory.buildings.length > 0) {
+    return res.status(400).json({ error: 'Auf diesem Gebiet steht bereits ein Gebäude.' });
   }
 
   // Check cost
@@ -197,7 +188,6 @@ app.post('/api/build', authMiddleware, (req, res) => {
   }
 
   territory.buildings.push({ type: buildingType, builtAt: new Date().toISOString() });
-  if (!territory.owner) territory.owner = groupId;
 
   db.recalcPoints();
   db.addEvent(`🏗 ${group.name} hat in ${territory.label} einen/eine ${bldDef.label} gebaut.`);
@@ -208,7 +198,7 @@ app.post('/api/build', authMiddleware, (req, res) => {
 // ─── Admin routes ─────────────────────────────────────────────────────────────
 
 // Admin: set resources for a group
-app.post('/api/admin/resources', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/resources', authMiddleware, adminOnly, (req, res) => {
   const { groupId, resource, value } = req.body;
   const state = db.getState();
   if (!state.groups[groupId]) return res.status(400).json({ error: 'Unbekannte Gruppe' });
@@ -220,7 +210,7 @@ app.post('/api/admin/resources', authMiddleware, adminOnly, (req, res) => {
 });
 
 // Admin: set territory owner
-app.post('/api/admin/territory', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/territory', authMiddleware, adminOnly, (req, res) => {
   const { territoryId, owner } = req.body; // owner: groupId or null
   const state = db.getState();
   if (!state.territories[territoryId]) return res.status(400).json({ error: 'Unbekanntes Territorium' });
@@ -237,7 +227,7 @@ app.post('/api/admin/territory', authMiddleware, adminOnly, (req, res) => {
 });
 
 // Admin: add or remove a building on a territory
-app.post('/api/admin/building', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/building', authMiddleware, adminOnly, (req, res) => {
   const { territoryId, action, buildingType, index } = req.body;
   const state = db.getState();
   if (!state.territories[territoryId]) return res.status(400).json({ error: 'Unbekanntes Territorium' });
@@ -261,7 +251,7 @@ app.post('/api/admin/building', authMiddleware, adminOnly, (req, res) => {
 });
 
 // Admin: manual dice roll
-app.post('/api/admin/dice', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/dice', authMiddleware, adminOnly, (req, res) => {
   const { value } = req.body;
   const state = db.getState();
   const roll = value ? parseInt(value) : null;
@@ -274,7 +264,7 @@ app.post('/api/admin/dice', authMiddleware, adminOnly, (req, res) => {
 });
 
 // Admin: configure auto-dice
-app.post('/api/admin/dice-config', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/dice-config', authMiddleware, adminOnly, (req, res) => {
   const { autoDice, intervalMinutes } = req.body;
   const state = db.getState();
 
@@ -293,7 +283,7 @@ app.post('/api/admin/dice-config', authMiddleware, adminOnly, (req, res) => {
 });
 
 // Admin: conquer / transfer territory (full control)
-app.post('/api/admin/conquer', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/conquer', authMiddleware, adminOnly, (req, res) => {
   const { territoryId, newOwner } = req.body;
   const state = db.getState();
   if (!state.territories[territoryId]) return res.status(400).json({ error: 'Unbekanntes Territorium' });
@@ -309,7 +299,7 @@ app.post('/api/admin/conquer', authMiddleware, adminOnly, (req, res) => {
 });
 
 // Admin: reset game
-app.post('/api/admin/reset', authMiddleware, adminOnly, (req, res) => {
+router.post('/api/admin/reset', authMiddleware, adminOnly, (req, res) => {
   const fresh = JSON.parse(JSON.stringify(DEFAULT_STATE));
   fresh.createdAt = new Date().toISOString();
   db.setState(fresh);
@@ -320,7 +310,7 @@ app.post('/api/admin/reset', authMiddleware, adminOnly, (req, res) => {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🏰 Habsburger Stadtgame → http://localhost:${PORT}`);
+  console.log(`\n🏰 Habsburger Stadtgame → http://localhost:${PORT}${BASE_PATH}`);
   console.log(`   Admin Code: ${ADMIN_CODE}`);
   Object.entries(GROUP_CODES).forEach(([g, c]) => console.log(`   ${g}: ${c}`));
   console.log('');

@@ -928,6 +928,11 @@ header {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const API = '/stadtgame';
+
+// ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
 let session = null;   // { role, groupId, name, code }
@@ -940,11 +945,13 @@ let uiTimer = null;
 // Using flat-top hexagons, offset grid
 // ═══════════════════════════════════════════════════════════════
 const R = 50;  // hex outer radius
-const W = R * 2;
-const H = Math.sqrt(3) * R;
 
-// Manual positions for a nice 24-hex Catan-like board
-// Arranged as 4-5-6-5-4 rows (total = 24)
+// True pointy-top hex tessellation spacing, so adjacent tiles share exact
+// corner points (needed to derive the Catan-style building vertices below).
+const COL_STEP = Math.sqrt(3) * R; // horizontal distance between centers in a row
+const ROW_STEP = 1.5 * R;          // vertical distance between rows
+
+// Positions for a 24-hex Catan-like board, arranged as 4-5-6-5-4 rows (=24)
 const HEX_POS = (() => {
   const positions = {};
   const rows = [
@@ -957,19 +964,52 @@ const HEX_POS = (() => {
 
   const cx = 390; // SVG center x
   const startY = 70;
-  const rowH = H * 0.88;
 
   rows.forEach(row => {
-    const totalW = (row.count - 1) * W * 0.87;
+    const totalW = (row.count - 1) * COL_STEP;
     const startX = cx - totalW / 2;
     row.ids.forEach((id, i) => {
-      const x = startX + i * W * 0.87;
-      const y = startY + row.yRow * rowH + (row.yRow % 2 === 1 ? 0 : 0);
+      const x = startX + i * COL_STEP;
+      const y = startY + row.yRow * ROW_STEP;
       positions[String(id)] = [x, y];
     });
   });
   return positions;
 })();
+
+// ─── Building vertices ───────────────────────────────────────────────────
+// Every hex corner that touches another hex is a potential building spot,
+// like the intersections between fields in Catan. We derive these purely
+// from the hex geometry above, so tiles that tessellate exactly share the
+// same corner point.
+const HEX_VERTICES = (() => {
+  const verts = new Map(); // "x,y" -> { x, y, terrIds: [] }
+  for (const [id, [cx, cy]] of Object.entries(HEX_POS)) {
+    hexPts(cx, cy, R).forEach(([x, y]) => {
+      const key = `${x.toFixed(1)},${y.toFixed(1)}`;
+      if (!verts.has(key)) verts.set(key, { x, y, terrIds: [] });
+      verts.get(key).terrIds.push(id);
+    });
+  }
+  return verts;
+})();
+
+// Pick the best building vertex for a territory: prefer the corner shared
+// by the most neighboring fields (a true 3-way intersection), then nudge it
+// slightly toward the owning hex's center so it visually sits "between the
+// fields" rather than exactly on top of neighbors' markers.
+function buildingSpotFor(id) {
+  const [cx, cy] = HEX_POS[id];
+  let best = null;
+  for (const [x, y] of hexPts(cx, cy, R)) {
+    const key = `${x.toFixed(1)},${y.toFixed(1)}`;
+    const v = HEX_VERTICES.get(key);
+    if (v && (!best || v.terrIds.length > best.terrIds.length)) best = v;
+  }
+  if (!best) return [cx, cy];
+  const t = 0.35; // 0 = at the vertex, 1 = at the hex center
+  return [best.x + (cx - best.x) * t, best.y + (cy - best.y) * t];
+}
 
 // Resource type to base color
 const RES_COLORS = {
@@ -1132,23 +1172,19 @@ function renderMap(state) {
     svg.appendChild(g);
   }
 
-  // Draw buildings ON TOP (at territory centers, offset slightly)
+  // Draw buildings ON TOP, at the vertex between this territory and its
+  // neighbors (like Catan settlements sitting between fields).
   for (const [id, terr] of Object.entries(territories)) {
     const pos = HEX_POS[id];
     if (!pos || !terr.buildings.length) continue;
-    const [cx, cy] = pos;
+    const [bx, by] = buildingSpotFor(id);
     const ownerColor = terr.owner ? (GROUP_COLORS[terr.owner] || '#ccc') : '#ccc';
 
     terr.buildings.forEach((bld, i) => {
-      // Position buildings slightly offset if multiple
-      const offsets = [
-        [0, 0],
-        [-12, -6],
-        [12, -6],
-        [0, -20],
-      ];
+      // Fan out slightly if more than one building shares the same spot
+      const offsets = [ [0, 0], [-10, -5], [10, -5], [0, -16] ];
       const [ox, oy] = offsets[Math.min(i, 3)];
-      const bldG = drawBuilding(svg, cx + ox, cy - 5 + oy, bld.type, ownerColor);
+      const bldG = drawBuilding(svg, bx + ox, by + oy, bld.type, ownerColor);
       bldG.classList.add('bld-g');
       bldG.style.filter = `drop-shadow(0 1px 2px rgba(0,0,0,0.7))`;
       bldG.style.pointerEvents = 'none';
@@ -1216,18 +1252,15 @@ function renderScoreboard(state) {
   el.innerHTML = sorted.map(([id, g]) => {
     const res = g.resources;
     const isMe = session?.groupId === id;
-    const woodStr = res.wood === '?' ? '?' : res.wood;
-    const stoneStr = res.stone === '?' ? '?' : res.stone;
-    const ironStr = res.iron === '?' ? '?' : res.iron;
 
     return `<div class="score-row${isMe ? '" style="border-color:'+g.color+';background:'+hexAlpha(g.color,0.08)+'"' : '"'}>
       <div class="score-dot" style="background:${g.color};box-shadow:0 0 5px ${g.color}"></div>
       <div style="flex:1">
         <div class="score-name">${g.name}${!g.joined ? ' <span style="font-size:0.6rem;color:#4a3a20">(noch nicht beigetreten)</span>' : ''}</div>
         <div class="res-chips">
-          <div class="res-chip">🪵 ${woodStr}</div>
-          <div class="res-chip">🪨 ${stoneStr}</div>
-          <div class="res-chip">⚙️ ${ironStr}</div>
+          <div class="res-chip">🪵 ${res.wood ?? 0}</div>
+          <div class="res-chip">🪨 ${res.stone ?? 0}</div>
+          <div class="res-chip">⚙️ ${res.iron ?? 0}</div>
         </div>
       </div>
       <div style="text-align:right">
@@ -1252,16 +1285,16 @@ function renderBuildSection(state) {
     return;
   }
 
-  // Populate territory select
+  // Populate territory select – only own territories without a building yet
+  // (the admin assigns ownership; players may not claim or restock land themselves)
   const prevVal = sel.value;
-  sel.innerHTML = '<option value="">— Territorium wählen —</option>' +
-    Object.entries(state.territories).map(([id, t]) => {
-      const ownerLabel = t.owner ? ` [${state.groups[t.owner]?.name || t.owner}]` : '';
-      const bldLabel = t.buildings.length ? ' ' + t.buildings.map(b =>
-        ({ outpost:'🏠', tower:'🗼', castle:'🏰' })[b.type] || '?'
-      ).join('') : '';
-      return `<option value="${id}">${t.label}${bldLabel}${ownerLabel}</option>`;
-    }).join('');
+  const buildable = Object.entries(state.territories)
+    .filter(([, t]) => t.owner === session?.groupId && t.buildings.length === 0);
+
+  sel.innerHTML = buildable.length
+    ? '<option value="">— Gebiet wählen —</option>' +
+      buildable.map(([id, t]) => `<option value="${id}">${t.label}</option>`).join('')
+    : '<option value="">Keine eigenen freien Gebiete</option>';
   if (prevVal) sel.value = prevVal;
 
   // Build buttons
@@ -1310,7 +1343,7 @@ function renderAdminPanel(state) {
   document.getElementById('admin-codes-display').innerHTML =
     `<b style="color:#6a5a40">Secret Codes:</b><br>` +
     Object.entries(state.groups).map(([id, g]) =>
-      `<span style="color:${g.color}">${g.name}</span>: <span style="font-family:monospace">...</span>`
+      `<span style="color:${g.color}">${g.name}</span>: <span style="font-family:monospace">${state.groupCodes?.[id] || '—'}</span>`
     ).join('<br>');
 
   // Resource editor
@@ -1423,7 +1456,7 @@ async function doLogin() {
   if (!code) return;
 
   try {
-    const res = await fetch('/api/auth', {
+    const res = await fetch(`${API}/api/auth`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ code }),
@@ -1478,7 +1511,7 @@ function startApp() {
 async function poll() {
   if (!session) return;
   try {
-    const res = await fetch('/api/game', {
+    const res = await fetch(`${API}/api/game`, {
       headers: { 'x-auth-code': session.code },
     });
     if (res.status === 401 || res.status === 403) { doLogout(); return; }
@@ -1511,7 +1544,7 @@ async function doBuild(type) {
   if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
 
   try {
-    const res = await apiFetch('/api/build', {
+    const res = await apiFetch(`${API}/api/build`, {
       method: 'POST',
       body: { territoryId: terrId, buildingType: type },
     });
@@ -1535,7 +1568,7 @@ async function saveResources(groupId) {
     if (!inp) continue;
     const val = parseInt(inp.value) || 0;
 
-    const r = await apiFetch('/api/admin/resources', {
+    const r = await apiFetch(`${API}/api/admin/resources`, {
       method: 'POST',
       body: { groupId, resource: res, value: val },
     });
@@ -1545,13 +1578,13 @@ async function saveResources(groupId) {
 
   showToast(`✅ Ressourcen gespeichert`);
   // Reload state
-  const r2 = await apiFetch('/api/game');
+  const r2 = await apiFetch(`${API}/api/game`);
   const d2 = await r2.json();
   updateAll(d2);
 }
 
 async function adminSetOwner(territoryId, newOwner) {
-  const r = await apiFetch('/api/admin/territory', {
+  const r = await apiFetch(`${API}/api/admin/territory`, {
     method: 'POST',
     body: { territoryId, owner: newOwner || null },
   });
@@ -1563,7 +1596,7 @@ async function adminSetOwner(territoryId, newOwner) {
 
 async function adminAddBuilding(territoryId, buildingType) {
   if (!buildingType) return;
-  const r = await apiFetch('/api/admin/building', {
+  const r = await apiFetch(`${API}/api/admin/building`, {
     method: 'POST',
     body: { territoryId, action: 'add', buildingType },
   });
@@ -1575,7 +1608,7 @@ async function adminAddBuilding(territoryId, buildingType) {
 
 async function adminRemoveBuilding(territoryId, index) {
   if (!confirm('Gebäude entfernen?')) return;
-  const r = await apiFetch('/api/admin/building', {
+  const r = await apiFetch(`${API}/api/admin/building`, {
     method: 'POST',
     body: { territoryId, action: 'remove', index },
   });
@@ -1588,7 +1621,7 @@ async function adminRemoveBuilding(territoryId, index) {
 async function adminDice() {
   const valInp = document.getElementById('manual-dice-val');
   const val = valInp ? parseInt(valInp.value) || null : null;
-  const r = await apiFetch('/api/admin/dice', { method: 'POST', body: { value: val } });
+  const r = await apiFetch(`${API}/api/admin/dice`, { method: 'POST', body: { value: val } });
   const data = await r.json();
   if (!r.ok) return showToast(data.error || 'Fehler', true);
   updateAll(data.state);
@@ -1599,7 +1632,7 @@ async function adminDice() {
 async function saveAutoConfig() {
   const autoDice = document.getElementById('auto-dice-toggle').checked;
   const intervalMinutes = parseInt(document.getElementById('dice-interval').value) || 15;
-  const r = await apiFetch('/api/admin/dice-config', {
+  const r = await apiFetch(`${API}/api/admin/dice-config`, {
     method: 'POST',
     body: { autoDice, intervalMinutes },
   });
@@ -1612,7 +1645,7 @@ async function saveAutoConfig() {
 async function adminReset() {
   if (!confirm('SPIEL WIRKLICH ZURÜCKSETZEN? Alle Daten gehen verloren!')) return;
   if (!confirm('Bist du SICHER? Letzter Schritt!')) return;
-  const r = await apiFetch('/api/admin/reset', { method: 'POST' });
+  const r = await apiFetch(`${API}/api/admin/reset`, { method: 'POST' });
   const data = await r.json();
   if (!r.ok) return showToast('Fehler beim Zurücksetzen', true);
   showToast('✅ Spiel zurückgesetzt');

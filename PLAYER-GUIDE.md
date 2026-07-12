@@ -6,7 +6,7 @@ Leitfaden für Spieler/Gruppen.
 
 ## 🔐 Anmelden
 
-1. **Browser öffnen:** `http://localhost:3000` (oder die Server-Adresse)
+1. **Browser öffnen:** `https://raspberry-pi-server.taila81f99.ts.net/stadtgame` (oder die Server-Adresse)
 2. **Geheimcode eingeben** (eine pro Gruppe)
 3. **"▶ Beitreten" klicken**
 4. ✅ Spielfeld wird sichtbar
@@ -19,11 +19,11 @@ Dein Code bleibt für die **gesamte Spiel-Session** gleich. Merke ihn dir!
 
 ### Territorium-Typen (Farben & Ressourcen)
 
-| Ressource | Farbe | Häufigkeit | Zahlen |
+| Ressource | Farbe | Häufigkeit | Felder |
 |---|---|---|---|
-| **Holz** 🪵 | Braun | Sehr häufig (Innen) | 5, 6, 8, 9 |
-| **Stein** 🪨 | Grau | Häufig (Mitte) | 4, 10 |
-| **Eisen** ⚙️ | Dunkelblau | Selten (Rand) | 2, 3, 11, 12 |
+| **Holz** 🪵 | Braun | Am häufigsten | 10 |
+| **Stein** 🪨 | Grau | Häufig | 8 |
+| **Eisen** ⚙️ | Dunkelblau | Am seltensten, nur am Spielfeldrand | 6 |
 
 **Habsburg Burg** (Territorium 24 – unten rechts):
 - Die Hauptstadt 👑
@@ -62,8 +62,7 @@ Du startest mit:
 
 ### Ressourcen sehen
 
-**Deine Ressourcen:** Alle 3 Werte sichtbar
-**Andere Gruppen:** Zeigen "?" (Geheimnis halten!)
+Alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
 
 ---
 
@@ -80,8 +79,7 @@ Du startest mit:
 ### Bauen – Schritt für Schritt
 
 1. **Territorium wählen**
-   - Im Spielfeld klicken
-   - Oder Dropdown "Territorium wählen" nutzen
+   - Im Dropdown "Gebiet wählen" erscheinen nur Gebiete, die dir der Admin bereits zugewiesen hat und auf denen noch kein Gebäude steht
 
 2. **Gebäude-Typ wählen**
    - 🏠 Vorposten, 🗼 Turm, oder 🏰 Burg
@@ -92,14 +90,13 @@ Du startest mit:
 
 4. **"Bauen" klicken**
    - Ressourcen werden abgezogen
-   - Territorium gehört jetzt dir
    - Gebäude erscheint auf der Karte
 
 ### Regeln für Bauen
 
-- **Vorposten:** Überall möglich (auch auf fremden Territorien, wenn dort noch nichts ist)
-- **Turm & Burg:** Nur auf deinen eigenen Territorien
-- **1 Gebäude pro Territorium:** Nach dem ersten wird's schwieriger
+- **Besitz vergibt nur der Admin:** Du kannst dir kein Gebiet selbst nehmen
+- **1 Gebäude pro Gebiet:** Sobald eines steht, ist der Platz belegt
+- Bauen geht nur auf Gebieten, die bereits deiner Gruppe gehören
 
 ---
 
@@ -140,9 +137,7 @@ Oben rechts: **"⚔ Rangliste"**
 
 Zeigt alle Gruppen mit:
 - 🎯 Aktuelle Siegpunkte
-- 🪵 Holz (deine = Zahl, andere = ?)
-- 🪨 Stein (deine = Zahl, andere = ?)
-- ⚙️ Eisen (deine = Zahl, andere = ?)
+- 🪵 Holz, 🪨 Stein, ⚙️ Eisen (für alle Gruppen sichtbar)
 
 ---
 
@@ -183,11 +178,11 @@ Zeigt die letzten 40 Aktionen:
 ### "Nicht genug Ressourcen"
 → Warten bis nächster Würfelwurf oder Handel mit anderen Gruppen
 
-### "Dieses Territorium ist bereits besetzt"
-→ Nur der aktuelle Besitzer kann Gebäude dort bauen
+### "Auf diesem Gebiet steht bereits ein Gebäude"
+→ Pro Gebiet ist nur 1 Gebäude möglich
 
-### "Territorium gehört mir nicht"
-→ Nur Vorposten auf fremden Territorien (wenn leer), sonst Burg/Turm verboten
+### "Dieses Gebiet gehört dir nicht"
+→ Frag den Admin, dir das Gebiet zuzuweisen, bevor du dort baust
 
 ### "Würfel läuft nicht"
 → Frag Admin nach! Evtl. Auto-Dice ist deaktiviert

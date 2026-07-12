@@ -11,12 +11,12 @@ Kompletter Guide für Spielleiter/Administrator.
 Bearbeite `gameState.js` vor dem **ersten Start:**
 
 ```javascript
-const ADMIN_CODE = 'ADMIN2026';  // ← Dein Admin-Passwort
+const ADMIN_CODE = 'FPU6-ZHZQ';  // ← Dein Admin-Passwort
 const GROUP_CODES = {
-  uri:         'URI2026',          // Gruppe 1
-  schwyz:      'SCHWYZ2026',       // Gruppe 2
-  unterwalden: 'UNTERWALDEN2026',  // Gruppe 3
-  luzern:      'LUZERN2026',       // Gruppe 4
+  uri:         '72TT-47GU',          // Gruppe 1
+  schwyz:      '7CWB-CK5V',       // Gruppe 2
+  unterwalden: 'TN92-3ZGE',  // Gruppe 3
+  luzern:      'E5B6-DDRC',       // Gruppe 4
 };
 ```
 
@@ -56,7 +56,7 @@ npm start
 
 ### Du (Admin) anmelden
 ```
-Code eingeben: ADMIN2026
+Code eingeben: FPU6-ZHZQ
 ```
 
 → Admin-Panel (Reiter "⚙ Admin") wird sichtbar

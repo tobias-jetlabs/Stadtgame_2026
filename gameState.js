@@ -2,12 +2,14 @@
 
 // ─── Secret codes ─────────────────────────────────────────────────────────────
 // These are set once and never change. Edit before first run.
-const ADMIN_CODE = 'ADMIN2026';
+// Randomly generated, unrelated to each other and to the group names on
+// purpose — so knowing one code gives no hint about any other code.
+const ADMIN_CODE = 'FPU6-ZHZQ';
 const GROUP_CODES = {
-  uri:         'URI2026',
-  schwyz:      'SCHWYZ2026',
-  unterwalden: 'UNTERWALDEN2026',
-  luzern:      'LUZERN2026',
+  uri:         '72TT-47GU',
+  schwyz:      '7CWB-CK5V',
+  unterwalden: 'TN92-3ZGE',
+  luzern:      'E5B6-DDRC',
 };
 
 // ─── Territory layout ─────────────────────────────────────────────────────────

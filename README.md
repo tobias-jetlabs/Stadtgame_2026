@@ -21,15 +21,15 @@ Browser öffnen, Secret Code eingeben → Spielfeld sehen!
 
 ### Admin (hat vollständige Kontrolle)
 ```
-ADMIN2026
+FPU6-ZHZQ
 ```
 
 ### Gruppen (pro Gruppe unterschiedlich)
 ```
-uri:          URI2026
-schwyz:       SCHWYZ2026
-unterwalden:  UNTERWALDEN2026
-luzern:       LUZERN2026
+uri:          72TT-47GU
+schwyz:       7CWB-CK5V
+unterwalden:  TN92-3ZGE
+luzern:       E5B6-DDRC
 ```
 
 **Diese Codes sind persistent** — sie ändern sich nicht während des Spiels.
@@ -118,7 +118,7 @@ Alle Requests brauchen Header: `x-auth-code: <SECRET>`
 #### Login / Identifizierung
 ```
 POST /stadtgame/api/auth
-{ "code": "URI2026" }
+{ "code": "72TT-47GU" }
 → { role: "player", groupId: "uri", name: "Uri" }
 ```
 
@@ -252,7 +252,7 @@ server {
 → `gameState.js` prüfen, Server neu starten
 
 ### Admin-Panel nicht sichtbar?
-→ Mit Admin-Code (`ADMIN2026`) anmelden
+→ Mit Admin-Code (`FPU6-ZHZQ`) anmelden
 
 ### Ressourcen-Updates bei anderen Spielern nicht sichtbar?
 → Frontend polled alle 3 Sekunden. Browser-Cache evtl. leeren.

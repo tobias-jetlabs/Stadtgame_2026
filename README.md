@@ -41,7 +41,7 @@ luzern:       LUZERN2026
 ### 🎮 SPIELER
 - ✅ Spielfeld ansehen (live mit anderen Spielern)
 - ✅ Ressourcen aller Gruppen sehen (Holz, Stein, Eisen)
-- ✅ Gebäude auf eigenen Territorien bauen (nur wenn vom Admin zugewiesen, noch kein Gebäude vorhanden, und Ressourcen reichen)
+- ✅ Bauten per Drag & Drop aus der Seitenleiste auf die Karte ziehen (nur auf Standorte, deren Gebiete komplett der eigenen Gruppe gehören, und wenn Ressourcen reichen)
 - ❌ Territorien selbst beanspruchen (Besitz vergibt nur der Admin)
 - ❌ Territorien erobern / übertragen
 - ❌ Würfeln
@@ -50,7 +50,7 @@ luzern:       LUZERN2026
 ### ⚙️ ADMINISTRATOR
 - ✅ **Alle** Ressourcen aller Gruppen anpassen (live)
 - ✅ Territorium-Besitzer ändern
-- ✅ Gebäude hinzufügen/entfernen (auf allen Territorien)
+- ✅ Bauten frei hinzufügen/entfernen (ohne Kosten, ohne Besitzprüfung)
 - ✅ Würfeln manuell oder automatisch
 - ✅ Auto-Dice Interval konfigurieren (1–120 Min)
 - ✅ Komplettes Spiel zurücksetzen
@@ -72,13 +72,22 @@ luzern:       LUZERN2026
 
 ---
 
-## 🏗 Gebäude & Kosten
+## 🏗 Bauten & Standorte
 
-| Typ | Kosten | VP | Emoji |
-|---|---|---|---|
-| **Vorposten** | 5🪵 + 2🪨 | 1 | 🏠 |
-| **Turm** | 3🪵 + 5🪨 + 1⚙️ | 2 | 🗼 |
-| **Burg** | 8🪵 + 8🪨 + 3⚙️ | 5 | 🏰 |
+| Typ | Kosten | VP | Standort | Besitzbedingung |
+|---|---|---|---|---|
+| **Turm** | 5🪵 + 10🪨 | 1 | Mitte eines Gebiets | Gebiet muss der Gruppe gehören |
+| **Stützpunkt** | 10🪵 + 25🪨 | 2 | Auf der Grenze zwischen 2 Gebieten | Beide Gebiete müssen der Gruppe gehören |
+| **Burg** | 20🪵 + 50🪨 + 10⚙️ | 5 | Am Kreuzungspunkt von 3 Gebieten | Alle 3 Gebiete müssen der Gruppe gehören |
+
+Jeder Standort (ein Gebiet, eine Kante, eine Ecke) kann nur **eine** Baute tragen. Die Standort-Id im
+`/api/build`-Aufruf ist die aufsteigend sortierte, mit `-` verbundene Liste der betroffenen
+Gebiets-Ids — z.B. `"5"` für einen Turm, `"5-9"` für einen Stützpunkt, `"1-2-5"` für eine Burg.
+
+**Besitz von Bauten ist unabhängig vom Gebietsbesitz:** Ändert sich der Besitzer eines Gebiets (z.B.
+durch den Admin), behalten die dort/daran stehenden Bauten weiterhin ihren ursprünglichen Besitzer.
+Ein "Challenge"-Mechanismus, um Bauten-Besitz anzufechten, ist als spätere Erweiterung vorgesehen,
+aber aktuell **nicht implementiert**.
 
 ---
 
@@ -91,9 +100,11 @@ luzern:       LUZERN2026
 
 ### Ressourcen-Produktion
 Wenn die Würfelzahl fällt:
-- Alle Territorien mit dieser Zahl produzieren ihre Ressource
-- Jedes Gebäude auf dem Territorium = 1 Ressource für den Besitzer
-- Beispiel: Territorium 8 (Holz) mit 2 Burgen → +2 Holz
+- Für jede Baute wird pro angrenzendem Gebiet mit passender Zahl 1 Ressource an den **Besitzer der
+  Baute** ausgeschüttet (nicht an den aktuellen Gebietsbesitzer)
+- Ein Stützpunkt/eine Burg kann so pro Wurf aus mehreren Gebieten gleichzeitig produzieren
+- Beispiel: Eine Burg an einer Ecke mit Holz-Gebiet (Zahl 8) + Stein-Gebiet (Zahl 8) → bei einer 8
+  gibt es +1 Holz UND +1 Stein für die Burg-Besitzerin
 
 ---
 
@@ -119,12 +130,15 @@ GET /stadtgame/api/game
 
 ### Player Endpoints
 
-#### Gebäude bauen
+#### Baute errichten
 ```
 POST /stadtgame/api/build
-{ "territoryId": "5", "buildingType": "outpost" }
+{ "buildingType": "turm", "locationId": "5" }
+{ "buildingType": "stuetzpunkt", "locationId": "5-9" }
+{ "buildingType": "burg", "locationId": "1-2-5" }
 ```
-Funktioniert nur, wenn das Territorium bereits vom Admin der eigenen Gruppe zugewiesen wurde und noch kein Gebäude darauf steht.
+Funktioniert nur, wenn alle in `locationId` genannten Gebiete der eigenen Gruppe gehören, dort noch
+keine Baute steht und genug Ressourcen vorhanden sind.
 
 ### Admin Endpoints
 
@@ -140,11 +154,11 @@ POST /stadtgame/api/admin/territory
 { "territoryId": "5", "owner": "uri" }
 ```
 
-#### Gebäude hinzufügen/entfernen
+#### Baute hinzufügen/entfernen (kostenlos, ohne Besitzprüfung)
 ```
 POST /stadtgame/api/admin/building
-{ "territoryId": "5", "action": "add", "buildingType": "castle" }
-{ "territoryId": "5", "action": "remove", "index": 0 }
+{ "action": "add", "buildingType": "burg", "locationId": "1-2-5", "owner": "uri" }
+{ "action": "remove", "structureId": "1735689600000-abcde" }
 ```
 
 #### Würfeln (manuell)

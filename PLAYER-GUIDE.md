@@ -35,13 +35,12 @@ Oben rechts jedes Territoriums eine Zahl (2–12).
 
 **Wenn diese Zahl gewürfelt wird:**
 → Alle Territorien mit dieser Zahl produzieren Ressourcen
-→ Jedes deiner Gebäude auf diesen Territorien = +1 Ressource
+→ Jede deiner Bauten, die an einem dieser Territorien liegt, bringt dir +1 Ressource
 
 **Beispiel:**
-- Territorium 8 (Holz, Zahl 6)
-- Du hast dort 1 Vorposten
+- Du hast einen Stützpunkt zwischen einem Holz-Gebiet (Zahl 6) und einem Stein-Gebiet (auch Zahl 6)
 - Würfel zeigt 6
-- Du bekommst +1 Holz 🪵
+- Du bekommst +1 Holz UND +1 Stein (eine Ressource pro angrenzendem Gebiet mit passender Zahl)
 
 ---
 
@@ -56,7 +55,7 @@ Du startest mit:
 
 1. **Durch Würfeln** (Auto oder manuell durch Admin)
    - Zahl fällt → alle Territorien mit dieser Zahl produzieren
-   - 1 Gebäude = 1 Ressource
+   - Pro angrenzendem Territorium mit passender Zahl = 1 Ressource für die Baute
 
 2. **Handel** (optional – mit anderen Gruppen abmachen)
 
@@ -66,45 +65,46 @@ Alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
 
 ---
 
-## 🏗 Gebäude bauen
+## 🏗 Bauten errichten
 
-### Verfügbare Gebäude
+### Verfügbare Bauten
 
-| Gebäude | Kosten | Punkte | Effekt |
+| Baute | Kosten | Punkte | Standort |
 |---|---|---|---|
-| **Vorposten** 🏠 | 5🪵 + 2🪨 | +1 | Basis-Kontrolle |
-| **Turm** 🗼 | 3🪵 + 5🪨 + 1⚙️ | +2 | Bessere Verteidigung |
-| **Burg** 🏰 | 8🪵 + 8🪨 + 3⚙️ | +5 | Maximum-Kontrolle |
+| **Turm** | 5🪵 + 10🪨 | +1 | Mitte eines Gebiets |
+| **Stützpunkt** | 10🪵 + 25🪨 | +2 | Grenze zwischen 2 Gebieten |
+| **Burg** | 20🪵 + 50🪨 + 10⚙️ | +5 | Kreuzungspunkt von 3 Gebieten |
 
 ### Bauen – Schritt für Schritt
 
-1. **Territorium wählen**
-   - Im Dropdown "Gebiet wählen" erscheinen nur Gebiete, die dir der Admin bereits zugewiesen hat und auf denen noch kein Gebäude steht
+1. **Baute in der Seitenleiste anfassen** ("⚒ Bauen")
+   - Turm, Stützpunkt oder Burg — je nachdem, welche Ressourcen du hast und wo du bauen willst
 
-2. **Gebäude-Typ wählen**
-   - 🏠 Vorposten, 🗼 Turm, oder 🏰 Burg
+2. **Auf die Karte ziehen**
+   - Während du ziehst, werden alle für dich gültigen Standorte auf der Karte als gestrichelte Punkte markiert
+   - Ein Turm braucht 1 eigenes Gebiet, ein Stützpunkt 2 aneinandergrenzende eigene Gebiete, eine Burg 3 Gebiete, die sich an einer Ecke berühren — **alle** beteiligten Gebiete müssen dir gehören
 
-3. **Ressourcen check**
-   - Hast du genug?
-   - Falls nicht: Warten bis nächster Würfelwurf
+3. **Über einem markierten Punkt loslassen**
+   - Der Punkt leuchtet auf, wenn du nah genug bist
+   - Loslassen außerhalb eines Punkts bricht den Bauvorgang ab, ohne etwas zu kosten
 
-4. **"Bauen" klicken**
-   - Ressourcen werden abgezogen
-   - Gebäude erscheint auf der Karte
+4. **Fertig**
+   - Ressourcen werden abgezogen, die Baute erscheint sofort auf der Karte
 
 ### Regeln für Bauen
 
 - **Besitz vergibt nur der Admin:** Du kannst dir kein Gebiet selbst nehmen
-- **1 Gebäude pro Gebiet:** Sobald eines steht, ist der Platz belegt
-- Bauen geht nur auf Gebieten, die bereits deiner Gruppe gehören
+- **1 Baute pro Standort:** Ist eine Stelle (Gebietsmitte, Kante, Ecke) belegt, kann dort nichts mehr gebaut werden
+- Für jede Baute müssen **alle** beteiligten Gebiete deiner Gruppe gehören
+- **Wichtig:** Wechselt später der Besitzer eines Gebiets, bleiben bereits gebaute Bauten trotzdem bei ihrem ursprünglichen Besitzer — sie wechseln nicht automatisch mit
 
 ---
 
 ## 🎯 Siegpunkte & Gewinnen
 
 **Punkte sammeln durch:**
-- Vorposten: 1 Punkt
-- Turm: 2 Punkte
+- Turm: 1 Punkt
+- Stützpunkt: 2 Punkte
 - Burg: 5 Punkte
 - **Habsburg Burg kontrollieren: 10 Punkte** 👑
 
@@ -126,7 +126,7 @@ Nächster in: 12:45
 
 ### Nach einem Wurf
 - Alle Territorien mit dieser Zahl produzieren
-- Deine Gebäude auf diesen Territorien → +Ressource
+- Deine Bauten an diesen Territorien → +Ressource
 - Event-Log zeigt: "🎲 Würfelwurf: 6. Uri: +2 Holz"
 
 ---
@@ -147,7 +147,7 @@ Unten rechts: **"📜 Ereignisse"**
 
 Zeigt die letzten 40 Aktionen:
 ```
-14:15  🏗 Uri hat in Marktplatz einen Vorposten gebaut.
+14:15  🏗 Uri hat Turm bei Marktplatz gebaut.
 14:18  🎲 Würfelwurf: 8. Schwyz: +3 Holz
 14:22  ⚔️ Unterwalden hat Territorium 7 von Uri erobert!
 ```
@@ -157,16 +157,16 @@ Zeigt die letzten 40 Aktionen:
 ## 💡 Strategietipps
 
 ### 1. Früh expandieren
-→ Viele Vorposten bauen, um früh Ressourcen zu sichern
+→ Viele Türme bauen, um früh Ressourcen zu sichern (billigste Baute)
 
 ### 2. Häufige Zahlen priorisieren
 → Territorien mit Zahlen 6, 8, 9, 5 sind produktiver
 
-### 3. Holz vorrat
-→ Holz brauchen alle Gebäude. Lager aufstocken!
+### 3. Stein-Vorrat
+→ Alle Bauten brauchen viel Stein, Stützpunkt und Burg besonders. Lager aufstocken!
 
 ### 4. Zusammenhängende Territorien
-→ Deine Territorien sollten sich berühren (sieht besser aus, ist strategischer)
+→ Nur wenn deine Gebiete aneinandergrenzen, kannst du Stützpunkte und Burgen bauen — plane deine Gebietswünsche beim Admin entsprechend
 
 ### 5. Die Burg anvisieren
 → Habsburg Burg (👑 Territorium 24) = 10 Punkte + Ansehen!
@@ -178,11 +178,14 @@ Zeigt die letzten 40 Aktionen:
 ### "Nicht genug Ressourcen"
 → Warten bis nächster Würfelwurf oder Handel mit anderen Gruppen
 
-### "Auf diesem Gebiet steht bereits ein Gebäude"
-→ Pro Gebiet ist nur 1 Gebäude möglich
+### "Dort steht bereits eine Baute"
+→ Pro Standort (Gebietsmitte, Kante, Ecke) ist nur 1 Baute möglich
 
-### "Dieses Gebiet gehört dir nicht"
-→ Frag den Admin, dir das Gebiet zuzuweisen, bevor du dort baust
+### "Du besitzt nicht alle für diese Baute nötigen Gebiete"
+→ Frag den Admin, dir die fehlenden Gebiete zuzuweisen, bevor du dort baust
+
+### Keine markierten Punkte beim Ziehen sichtbar
+→ Du besitzt noch keine passenden Gebiete für diese Baute (bzw. bei Stützpunkt/Burg: keine zwei/drei zusammenhängenden eigenen Gebiete)
 
 ### "Würfel läuft nicht"
 → Frag Admin nach! Evtl. Auto-Dice ist deaktiviert

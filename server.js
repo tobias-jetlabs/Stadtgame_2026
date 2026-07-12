@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const db = require('./db');
-const { DEFAULT_STATE, ADMIN_CODE, GROUP_CODES } = require('./gameState');
+const { DEFAULT_STATE, ADMIN_CODE, GROUP_CODES, resolveLocation } = require('./gameState');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -53,13 +53,19 @@ function distributeResources(roll) {
   const state = db.getState();
   const gained = {};
 
-  for (const territory of Object.values(state.territories)) {
-    if (territory.number !== roll) continue;
-    if (!territory.owner || territory.buildings.length === 0) continue;
-    const res = territory.resourceType || 'wood';
-    const amount = territory.buildings.length;
-    if (!gained[territory.owner]) gained[territory.owner] = {};
-    gained[territory.owner][res] = (gained[territory.owner][res] || 0) + amount;
+  // Production is keyed off each structure's own owner (not the current
+  // territory owner) — a structure keeps producing for whoever built it even
+  // if the territory it sits on/between later changes hands. A structure
+  // produces once per territory it touches whose number matches the roll
+  // (so a Stützpunkt/Burg can produce from more than one field per roll).
+  for (const structure of state.structures) {
+    for (const tId of structure.territories) {
+      const territory = state.territories[tId];
+      if (!territory || territory.number !== roll) continue;
+      const res = territory.resourceType || 'wood';
+      if (!gained[structure.owner]) gained[structure.owner] = {};
+      gained[structure.owner][res] = (gained[structure.owner][res] || 0) + 1;
+    }
   }
 
   for (const [group, resources] of Object.entries(gained)) {
@@ -152,45 +158,54 @@ router.get('/api/game', authMiddleware, (req, res) => {
 // ─── Player routes ────────────────────────────────────────────────────────────
 
 router.post('/api/build', authMiddleware, (req, res) => {
-  const { territoryId, buildingType } = req.body;
+  const { buildingType, locationId } = req.body;
   const state = db.getState();
   const groupId = req.role === 'admin' ? req.body.group : req.groupId;
 
   if (!state.groups[groupId]) return res.status(400).json({ error: 'Unbekannte Gruppe' });
-  if (!state.territories[territoryId]) return res.status(400).json({ error: 'Unbekanntes Territorium' });
-  if (!state.buildings[buildingType]) return res.status(400).json({ error: 'Unbekannter Gebäudetyp' });
-
-  const territory = state.territories[territoryId];
-  const group = state.groups[groupId];
   const bldDef = state.buildings[buildingType];
+  if (!bldDef) return res.status(400).json({ error: 'Unbekannter Gebäudetyp' });
 
-  // Players can only build on territories the admin has already assigned to them
-  if (req.role === 'player' && territory.owner !== groupId) {
-    return res.status(403).json({ error: 'Dieses Gebiet gehört dir nicht. Der Admin muss es dir zuerst zuweisen.' });
+  const territoryIds = resolveLocation(bldDef.placement, locationId);
+  if (!territoryIds) return res.status(400).json({ error: 'Ungültiger Standort für diesen Gebäudetyp.' });
+  const key = territoryIds.join('-');
+
+  if (state.structures.some(s => s.locationId === key)) {
+    return res.status(400).json({ error: 'Dort steht bereits eine Baute.' });
   }
 
-  // Players can only build if the territory has no building yet
-  if (req.role === 'player' && territory.buildings.length > 0) {
-    return res.status(400).json({ error: 'Auf diesem Gebiet steht bereits ein Gebäude.' });
+  const group = state.groups[groupId];
+
+  // Players may only build where they own every territory the structure spans
+  if (req.role === 'player' && !territoryIds.every(id => state.territories[id].owner === groupId)) {
+    return res.status(403).json({ error: 'Du besitzt nicht alle für diese Baute nötigen Gebiete.' });
   }
 
   // Check cost
-  for (const [res, cost] of Object.entries(bldDef.cost)) {
-    if (cost > 0 && (group.resources[res] || 0) < cost) {
+  for (const [resKey, cost] of Object.entries(bldDef.cost)) {
+    if (cost > 0 && (group.resources[resKey] || 0) < cost) {
       const resName = { wood: 'Holz', stone: 'Stein', iron: 'Eisen' };
-      return res.status(400).json({ error: `Nicht genug ${resName[res] || res}` });
+      return res.status(400).json({ error: `Nicht genug ${resName[resKey] || resKey}` });
     }
   }
 
   // Deduct cost
-  for (const [res, cost] of Object.entries(bldDef.cost)) {
-    group.resources[res] = (group.resources[res] || 0) - cost;
+  for (const [resKey, cost] of Object.entries(bldDef.cost)) {
+    group.resources[resKey] = (group.resources[resKey] || 0) - cost;
   }
 
-  territory.buildings.push({ type: buildingType, builtAt: new Date().toISOString() });
+  state.structures.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    type: buildingType,
+    owner: groupId,
+    locationId: key,
+    territories: territoryIds,
+    builtAt: new Date().toISOString(),
+  });
 
   db.recalcPoints();
-  db.addEvent(`🏗 ${group.name} hat in ${territory.label} einen/eine ${bldDef.label} gebaut.`);
+  const spotLabel = territoryIds.map(id => state.territories[id].label).join(' / ');
+  db.addEvent(`🏗 ${group.name} hat ${bldDef.label} bei ${spotLabel} gebaut.`);
 
   res.json({ success: true, state: db.getState() });
 });
@@ -226,24 +241,39 @@ router.post('/api/admin/territory', authMiddleware, adminOnly, (req, res) => {
   res.json({ success: true, state: db.getState() });
 });
 
-// Admin: add or remove a building on a territory
+// Admin: add or remove a structure (free of cost, bypasses ownership checks)
 router.post('/api/admin/building', authMiddleware, adminOnly, (req, res) => {
-  const { territoryId, action, buildingType, index } = req.body;
+  const { action, buildingType, locationId, owner, structureId } = req.body;
   const state = db.getState();
-  if (!state.territories[territoryId]) return res.status(400).json({ error: 'Unbekanntes Territorium' });
-
-  const t = state.territories[territoryId];
 
   if (action === 'add') {
-    if (!state.buildings[buildingType]) return res.status(400).json({ error: 'Unbekannter Gebäudetyp' });
-    t.buildings.push({ type: buildingType, builtAt: new Date().toISOString() });
-    db.addEvent(`🔧 Admin: ${state.buildings[buildingType].label} in ${t.label} hinzugefügt.`);
-  } else if (action === 'remove') {
-    if (index === undefined || index < 0 || index >= t.buildings.length) {
-      return res.status(400).json({ error: 'Ungültiger Index' });
+    const bldDef = state.buildings[buildingType];
+    if (!bldDef) return res.status(400).json({ error: 'Unbekannter Gebäudetyp' });
+    if (!state.groups[owner]) return res.status(400).json({ error: 'Unbekannte Gruppe' });
+
+    const territoryIds = resolveLocation(bldDef.placement, locationId);
+    if (!territoryIds) return res.status(400).json({ error: 'Ungültiger Standort für diesen Gebäudetyp.' });
+    const key = territoryIds.join('-');
+    if (state.structures.some(s => s.locationId === key)) {
+      return res.status(400).json({ error: 'Dort steht bereits eine Baute.' });
     }
-    const removed = t.buildings.splice(index, 1)[0];
-    db.addEvent(`🔧 Admin: ${state.buildings[removed.type]?.label || removed.type} in ${t.label} entfernt.`);
+
+    state.structures.push({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      type: buildingType,
+      owner,
+      locationId: key,
+      territories: territoryIds,
+      builtAt: new Date().toISOString(),
+    });
+    const spotLabel = territoryIds.map(id => state.territories[id].label).join(' / ');
+    db.addEvent(`🔧 Admin: ${bldDef.label} (${state.groups[owner].name}) bei ${spotLabel} hinzugefügt.`);
+  } else if (action === 'remove') {
+    const idx = state.structures.findIndex(s => s.id === structureId);
+    if (idx === -1) return res.status(400).json({ error: 'Baute nicht gefunden' });
+    const removed = state.structures.splice(idx, 1)[0];
+    const spotLabel = removed.territories.map(id => state.territories[id]?.label || id).join(' / ');
+    db.addEvent(`🔧 Admin: ${state.buildings[removed.type]?.label || removed.type} bei ${spotLabel} entfernt.`);
   }
 
   db.recalcPoints();

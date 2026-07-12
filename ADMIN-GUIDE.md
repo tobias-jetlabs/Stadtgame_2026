@@ -65,7 +65,7 @@ Code eingeben: ADMIN2026
 
 ## ⚙️ Admin-Panel
 
-Vier Hauptbereiche:
+Fünf Hauptbereiche:
 
 ### 1️⃣ WÜRFELKONFIGURATION
 
@@ -97,12 +97,31 @@ Pro Gruppe drei Eingabefelder für:
 
 ---
 
-### 3️⃣ TERRITORIEN & GEBÄUDE VERWALTEN
+### 3️⃣ BAUTEN VERWALTEN
 
-**Große Tabelle mit allen 24 Territorien:**
+Freies Hinzufügen/Entfernen von Bauten, **ohne** Kosten und **ohne** Besitzprüfung — dein direkter
+Eingriff, unabhängig von dem, was Spieler per Drag & Drop dürfen.
 
-Spalten:
-| # | Name | Ressource | Zahl | Besitzer | Gebäude | Hinzufügen |
+**Hinzufügen:**
+1. Bautentyp wählen (Turm/Stützpunkt/Burg) — die Standort-Auswahl daneben passt sich automatisch an
+   (nur Gebiete für Turm, nur freie Kanten für Stützpunkt, nur freie 3er-Ecken für Burg)
+2. Standort wählen (nur noch unbesetzte Standorte werden angezeigt)
+3. Besitzer-Gruppe wählen
+4. "Hinzufügen" klicken
+
+**Entfernen:** Auf eine Baute in der Liste darunter klicken (✕).
+
+**Wichtig:** Baute-Besitz ist unabhängig vom Gebietsbesitz. Wenn du einer anderen Gruppe ein Gebiet
+zuweist, bleiben die bereits dort/daran stehenden Bauten beim ursprünglichen Besitzer — sie wechseln
+nicht automatisch mit.
+
+---
+
+### 4️⃣ TERRITORIEN VERWALTEN
+
+**Tabelle mit allen 24 Territorien:**
+
+Spalten: | # | Name | Ressource | Zahl | Besitzer |
 
 **Besitzer ändern:**
 - Dropdown "Besitzer" klicken
@@ -110,19 +129,15 @@ Spalten:
 - Territory wird sofort neu eingefärbt
 - **Wichtig:** Nur der Admin vergibt Gebietsbesitz. Spieler können sich kein Gebiet selbst nehmen — erst wenn du hier eine Gruppe zuweist, darf diese Gruppe dort im Spieler-Tab bauen.
 
-**Gebäude verwalten:**
-- Bestehende Gebäude: Tag anklicken → entfernt
-- Neues Gebäude: "Gebäude" Dropdown → Typ wählen
-- Über diese Admin-Tabelle kannst du (im Gegensatz zu Spielern) auch mehrere Gebäude auf ein Gebiet setzen
-
 **Beispiel: Uri soll Territorium 5 bekommen**
 1. Dropdown "Besitzer" auf "Uri" setzen
-2. Uri kann nun im Spieler-Tab auf Territorium 5 ein Gebäude bauen (solange keins vorhanden ist)
-3. Nächster Würfelwurf: Uri bekommt +1 Stein pro Gebäude (falls Zahl 4)
+2. Uri kann nun einen Turm auf Territorium 5 bauen (oder einen Stützpunkt/eine Burg, sobald auch die
+   Nachbargebiete Uri gehören)
+3. Nächster Würfelwurf: Uri bekommt +1 Stein pro dort stehender Baute (falls Zahl 4)
 
 ---
 
-### 4️⃣ SCHNELLAKTIONEN
+### 5️⃣ SCHNELLAKTIONEN
 
 - **🎲 Zufälliger Würfelwurf** → zufällig 2–12
 - **🔄 Spiel zurücksetzen** → ACHTUNG: Alle Daten weg! Doppelte Bestätigung
@@ -139,12 +154,12 @@ Spalten:
    - Event-Log zeigt: "🎲 Würfelwurf: 6. Uri: +2 Holz"
 
 2. **Spieler bauen**
-   - Spieler wählen Territorium → Gebäude-Typ
-   - Admin sieht sofort in der Karte die neuen Gebäude
+   - Spieler ziehen eine Baute aus der Seitenleiste auf einen markierten Standort auf der Karte
+   - Admin sieht sofort in der Karte die neuen Bauten
 
 3. **Admin kann eingreifen**
    - Ressourcen anpassen
-   - Gebäude hinzufügen/entfernen
+   - Bauten hinzufügen/entfernen
    - Territory umowned
 
 4. **Würfel manuell (wenn nötig)**
@@ -158,7 +173,7 @@ Spalten:
 ### Event-Log lesen
 Rechts im Spielfeld-Tab, "📜 Ereignisse":
 ```
-14:15  🏗 Uri hat in Marktplatz einen/eine Vorposten gebaut.
+14:15  🏗 Uri hat Turm bei Marktplatz gebaut.
 14:18  🎲 Würfelwurf: 8. Schwyz: +3 Holz
 14:20  🔧 Admin: Luzern → Stein = 25
 ```
@@ -186,11 +201,11 @@ Ressourcen aller Gruppen sind für Admin **und** alle Spieler als exakte Zahlen 
 2. Interval > 0?
 3. Server läuft noch?
 
-### "Gruppe hat Territory ohne Gebäude"
+### "Gruppe hat Gebiet ohne Baute"
 **Manuell korrigieren:**
 1. Territorium in Tabelle finden
 2. Besitzer-Dropdown auf andere Gruppe setzen
-3. Oder: Gebäude hinzufügen, dann kommt die Produktion beim nächsten Würfelwurf
+3. Oder: Im Bauten-Bereich eine passende Baute hinzufügen, dann kommt die Produktion beim nächsten Würfelwurf
 
 ### "Spiel kaputt – komplett zurücksetzen"
 1. Admin-Panel → Schnellaktionen
@@ -262,7 +277,12 @@ A: Im Default: 4 (Uri, Schwyz, Unterwalden, Luzern). Mehr im Code hinzufügbar.
 A: Ja, alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
 
 **F: Können Spieler sich selbst ein Gebiet nehmen?**
-A: Nein. Nur der Admin vergibt Gebietsbesitz (Territorien-Tabelle). Spieler dürfen dann auf ihren zugewiesenen, noch unbebauten Gebieten selbst bauen.
+A: Nein. Nur der Admin vergibt Gebietsbesitz (Territorien-Tabelle). Spieler dürfen dann auf ihren zugewiesenen, noch unbebauten Gebieten/Kanten/Ecken selbst bauen.
+
+**F: Was passiert mit Bauten, wenn ein Gebiet den Besitzer wechselt?**
+A: Nichts — Bauten behalten immer ihren ursprünglichen Besitzer, unabhängig davon, wem das Gebiet
+gerade gehört. Das Anfechten ("Challenge") von Bauten-Besitz ist als spätere Erweiterung geplant,
+aktuell aber nicht möglich.
 
 ---
 

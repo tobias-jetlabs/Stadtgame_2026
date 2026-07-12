@@ -249,6 +249,7 @@ header {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .map-area h3 {
@@ -331,16 +332,16 @@ header {
 
 .res-chips {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   margin-top: 3px;
 }
 
 .res-chip {
-  font-size: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
   font-family: 'Courier New', monospace;
-  background: rgba(255,255,255,0.04);
-  border-radius: 3px;
-  padding: 2px 5px;
   color: #8a7a60;
 }
 
@@ -350,43 +351,69 @@ header {
   border-bottom: 1px solid rgba(200,148,42,0.1);
 }
 
-.terr-sel {
-  width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(200,148,42,0.2);
-  color: var(--parchment);
-  border-radius: 4px;
-  padding: 7px 10px;
-  font-size: 0.8rem;
-  margin-bottom: 10px;
-  appearance: none;
-}
-
-.terr-sel option { background: #1c1810; }
-
-.bld-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.bld-btn {
-  padding: 8px 4px;
-  background: rgba(200,148,42,0.07);
-  border: 1px solid rgba(200,148,42,0.2);
-  border-radius: 4px;
-  color: var(--gold2);
-  cursor: pointer;
+.build-hint {
   font-size: 0.68rem;
-  text-align: center;
-  transition: all 0.15s;
+  color: #7a6a50;
+  margin-bottom: 10px;
   line-height: 1.4;
 }
 
-.bld-btn:hover { background: rgba(200,148,42,0.18); border-color: var(--gold); }
-.bld-btn .bld-icon { display: block; font-size: 1.3rem; margin-bottom: 3px; }
-.bld-btn .bld-cost { display: block; font-size: 0.58rem; color: #7a6a50; margin-top: 2px; }
+.build-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.build-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(200,148,42,0.07);
+  border: 1px solid rgba(200,148,42,0.2);
+  border-radius: 5px;
+  cursor: grab;
+  touch-action: none;
+  transition: all 0.15s;
+}
+
+.build-card:hover { background: rgba(200,148,42,0.16); border-color: var(--gold); }
+.build-card:active { cursor: grabbing; }
+.build-card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+.build-card-icon { flex-shrink: 0; color: var(--gold2); }
+.build-card-info { flex: 1; min-width: 0; }
+.build-card-name { font-size: 0.78rem; color: var(--gold2); }
+.build-card-cost { display: flex; gap: 8px; margin-top: 3px; }
+
+.cost-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  color: #9a8a60;
+  font-family: 'Courier New', monospace;
+}
+
+/* Drag & drop */
+.drag-ghost {
+  position: fixed;
+  width: 34px; height: 34px;
+  pointer-events: none;
+  z-index: 2000;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+  color: var(--gold2);
+  opacity: 0.92;
+}
+
+.drop-target {
+  fill: rgba(200,148,42,0.12);
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  stroke-dasharray: 3,2;
+}
+.drop-target.hover { fill: rgba(200,148,42,0.5); stroke-width: 2.5; stroke-dasharray: none; }
 
 /* Event log */
 .event-log {
@@ -587,9 +614,8 @@ header {
   display: flex;
   align-items: center;
   gap: 3px;
+  color: var(--gold-dim);
 }
-
-.res-field label { font-size: 0.65rem; color: #7a6a50; }
 
 .res-inp {
   width: 56px;
@@ -654,6 +680,21 @@ header {
 
 .terr-owner-sel option { background: #1c1810; }
 
+/* Structures admin panel */
+.structure-add-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.structures-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .bld-tags {
   display: flex;
   gap: 3px;
@@ -661,31 +702,16 @@ header {
 }
 
 .bld-tag {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   background: rgba(200,148,42,0.1);
   border: 1px solid rgba(200,148,42,0.2);
   border-radius: 3px;
-  padding: 2px 5px;
+  padding: 3px 6px;
   cursor: pointer;
   transition: all 0.12s;
 }
 
 .bld-tag:hover { background: rgba(180,40,40,0.25); border-color: #c04040; color: #e08080; }
-
-.add-bld-sel {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(200,148,42,0.15);
-  border-radius: 3px;
-  color: #8a7a60;
-  padding: 2px 5px;
-  font-size: 0.65rem;
-  cursor: pointer;
-}
-
-.add-bld-sel option { background: #1c1810; }
-
-/* ═══════════════════════════════════════════ SVG BUILDINGS */
-/* Buildings are drawn as SVG shapes, not emoji */
 
 /* ═══════════════════════════════════════════ TOOLTIP */
 #tooltip {
@@ -699,13 +725,13 @@ header {
   pointer-events: none;
   z-index: 500;
   display: none;
-  max-width: 200px;
+  max-width: 220px;
   line-height: 1.55;
   box-shadow: 0 4px 18px rgba(0,0,0,0.5);
 }
 
 .tt-title { font-size: 0.9rem; color: var(--gold2); margin-bottom: 4px; font-weight: bold; }
-.tt-res { font-size: 0.7rem; color: var(--gold-dim); letter-spacing: 0.06em; }
+.tt-res { font-size: 0.7rem; color: var(--gold-dim); letter-spacing: 0.06em; display: flex; align-items: center; gap: 4px; }
 .tt-line { font-size: 0.73rem; color: #9a8a60; margin-top: 3px; }
 
 /* ═══════════════════════════════════════════ TOAST */
@@ -832,10 +858,8 @@ header {
         <!-- Build section (shown for players) -->
         <div class="build-section" id="player-build-section">
           <div class="msb-title">⚒ Bauen</div>
-          <select class="terr-sel" id="build-terr-sel">
-            <option value="">— Territorium wählen —</option>
-          </select>
-          <div class="bld-grid" id="bld-grid"></div>
+          <div class="build-hint">Baute auf die Karte ziehen und über einem markierten Punkt loslassen.</div>
+          <div class="build-list" id="build-list"></div>
         </div>
 
         <!-- Event Log -->
@@ -894,9 +918,25 @@ header {
           <div class="res-editor" id="res-editor"></div>
         </div>
 
+        <!-- Bauten verwalten -->
+        <div class="admin-card full">
+          <h3>🏗 Bauten verwalten</h3>
+          <div class="structure-add-row">
+            <select class="adm-select" id="struct-type-sel">
+              <option value="turm">Turm (1 Gebiet)</option>
+              <option value="stuetzpunkt">Stützpunkt (2 Gebiete)</option>
+              <option value="burg">Burg (3 Gebiete)</option>
+            </select>
+            <select class="adm-select" id="struct-loc-sel"></select>
+            <select class="adm-select" id="struct-owner-sel"></select>
+            <button class="adm-btn" onclick="adminAddStructure()">Hinzufügen</button>
+          </div>
+          <div class="structures-list" id="structures-list"></div>
+        </div>
+
         <!-- Territorien Editor -->
         <div class="admin-card full">
-          <h3>🗺 Territorien & Gebäude verwalten</h3>
+          <h3>🗺 Territorien verwalten</h3>
           <div style="overflow-x:auto">
             <table class="terr-admin-table" id="terr-admin-table">
               <thead>
@@ -906,8 +946,6 @@ header {
                   <th>Ressource</th>
                   <th>Zahl</th>
                   <th>Besitzer</th>
-                  <th>Gebäude</th>
-                  <th>Hinzufügen</th>
                 </tr>
               </thead>
               <tbody id="terr-admin-tbody"></tbody>
@@ -937,17 +975,19 @@ let session = null;   // { role, groupId, name, code }
 let gameState = null;
 let pollTimer = null;
 let uiTimer = null;
+let dragState = null; // active drag-to-build operation, see startDrag()
 
 // ═══════════════════════════════════════════════════════════════
 // HEX GRID – 24 territories in a proper hex layout
-// Using flat-top hexagons, offset grid
 // ═══════════════════════════════════════════════════════════════
 const R = 50;  // hex outer radius
 
 // True pointy-top hex tessellation spacing, so adjacent tiles share exact
-// corner points (needed to derive the Catan-style building vertices below).
-const COL_STEP = Math.sqrt(3) * R; // horizontal distance between centers in a row
-const ROW_STEP = 1.5 * R;          // vertical distance between rows
+// corner points (needed to derive edge/vertex build spots below). Mirrors
+// gameState.js on the server exactly, so client-computed spots line up with
+// what the server accepts.
+const COL_STEP = Math.sqrt(3) * R;
+const ROW_STEP = 1.5 * R;
 
 // Positions for a 24-hex Catan-like board, arranged as 4-5-6-5-4 rows (=24)
 const HEX_POS = (() => {
@@ -974,40 +1014,6 @@ const HEX_POS = (() => {
   });
   return positions;
 })();
-
-// ─── Building vertices ───────────────────────────────────────────────────
-// Every hex corner that touches another hex is a potential building spot,
-// like the intersections between fields in Catan. We derive these purely
-// from the hex geometry above, so tiles that tessellate exactly share the
-// same corner point.
-const HEX_VERTICES = (() => {
-  const verts = new Map(); // "x,y" -> { x, y, terrIds: [] }
-  for (const [id, [cx, cy]] of Object.entries(HEX_POS)) {
-    hexPts(cx, cy, R).forEach(([x, y]) => {
-      const key = `${x.toFixed(1)},${y.toFixed(1)}`;
-      if (!verts.has(key)) verts.set(key, { x, y, terrIds: [] });
-      verts.get(key).terrIds.push(id);
-    });
-  }
-  return verts;
-})();
-
-// Pick the best building vertex for a territory: prefer the corner shared
-// by the most neighboring fields (a true 3-way intersection), then nudge it
-// slightly toward the owning hex's center so it visually sits "between the
-// fields" rather than exactly on top of neighbors' markers.
-function buildingSpotFor(id) {
-  const [cx, cy] = HEX_POS[id];
-  let best = null;
-  for (const [x, y] of hexPts(cx, cy, R)) {
-    const key = `${x.toFixed(1)},${y.toFixed(1)}`;
-    const v = HEX_VERTICES.get(key);
-    if (v && (!best || v.terrIds.length > best.terrIds.length)) best = v;
-  }
-  if (!best) return [cx, cy];
-  const t = 0.35; // 0 = at the vertex, 1 = at the hex center
-  return [best.x + (cx - best.x) * t, best.y + (cy - best.y) * t];
-}
 
 // Resource type to base color
 const RES_COLORS = {
@@ -1048,36 +1054,88 @@ function svgText(x, y, text, attrs = {}) {
   return el;
 }
 
-// Building SVG shapes (drawn at building locations between hexes)
-function drawBuilding(svg, cx, cy, type, color) {
+// ═══════════════════════════════════════════════════════════════
+// ICONS — small line-art symbols instead of emoji, for resources and
+// buildings. Defined once as shape lists (24x24 viewBox) and rendered
+// either as standalone HTML <svg> strings or stamped into the map SVG.
+// ═══════════════════════════════════════════════════════════════
+const ICON_SHAPES = {
+  wood: [ // log cross-section / tree rings
+    { tag: 'circle', attrs: { cx: 12, cy: 12, r: 9,   fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6 } },
+    { tag: 'circle', attrs: { cx: 12, cy: 12, r: 5,   fill: 'none', stroke: 'currentColor', 'stroke-width': 1.4 } },
+    { tag: 'circle', attrs: { cx: 12, cy: 12, r: 1.6, fill: 'currentColor' } },
+  ],
+  stone: [ // angular boulder
+    { tag: 'polygon', attrs: { points: '4,15 8,6 16,5 20,13 15,20 7,20', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6, 'stroke-linejoin': 'round' } },
+  ],
+  iron: [ // ore crystal
+    { tag: 'polygon', attrs: { points: '12,3 20,9 17,20 7,20 4,9', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6, 'stroke-linejoin': 'round' } },
+    { tag: 'polygon', attrs: { points: '12,8 16,11 14,17 10,17 8,11', fill: 'currentColor', opacity: 0.55 } },
+  ],
+  turm: [ // tower with battlements — built in a territory's centre
+    { tag: 'rect', attrs: { x: 8,    y: 10, width: 8,   height: 11, fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 7,    y: 6,  width: 2.5, height: 4,  fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 10.75,y: 6,  width: 2.5, height: 4,  fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 14.5, y: 6,  width: 2.5, height: 4,  fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 10.5, y: 14, width: 3,   height: 7,  fill: 'rgba(0,0,0,0.45)' } },
+  ],
+  stuetzpunkt: [ // fortified outpost — built on the border between two territories
+    { tag: 'rect',    attrs: { x: 5,   y: 12, width: 14, height: 8, fill: 'currentColor' } },
+    { tag: 'polygon', attrs: { points: '3,12 12,5 21,12', fill: 'currentColor', opacity: 0.75 } },
+    { tag: 'rect',    attrs: { x: 10.5, y: 15, width: 3, height: 5, fill: 'rgba(0,0,0,0.4)' } },
+  ],
+  burg: [ // castle with twin towers — built where 3 territories meet
+    { tag: 'rect', attrs: { x: 6,    y: 11, width: 12, height: 9,   fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 3,    y: 8,  width: 5,   height: 8,  fill: 'currentColor', opacity: 0.9 } },
+    { tag: 'rect', attrs: { x: 16,   y: 8,  width: 5,   height: 8,  fill: 'currentColor', opacity: 0.9 } },
+    { tag: 'rect', attrs: { x: 3,    y: 6,  width: 5,   height: 2.5,fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 16,   y: 6,  width: 5,   height: 2.5,fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 10,   y: 8,  width: 4,   height: 3,  fill: 'currentColor' } },
+    { tag: 'rect', attrs: { x: 10.5, y: 15, width: 3,   height: 5,  fill: 'rgba(0,0,0,0.45)' } },
+  ],
+};
+
+function iconSvgString(name, size = 14, color) {
+  const shapes = ICON_SHAPES[name] || [];
+  const inner = shapes.map(s => `<${s.tag} ${Object.entries(s.attrs).map(([k,v]) => `${k}="${v}"`).join(' ')}/>`).join('');
+  const style = color ? ` style="color:${color}"` : '';
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}"${style}>${inner}</svg>`;
+}
+
+// Stamps an icon into the map SVG at (cx, cy), with explicit colors instead
+// of relying on currentColor (nested <svg> inheritance is unreliable).
+function iconSvgNode(name, cx, cy, size, color) {
+  const wrap = svgEl('svg', { x: cx - size / 2, y: cy - size / 2, width: size, height: size, viewBox: '0 0 24 24' });
+  (ICON_SHAPES[name] || []).forEach(s => {
+    const attrs = { ...s.attrs };
+    if (attrs.fill === 'currentColor') attrs.fill = color;
+    if (attrs.stroke === 'currentColor') attrs.stroke = color;
+    wrap.appendChild(svgEl(s.tag, attrs));
+  });
+  return wrap;
+}
+
+// Detailed, owner-colored building glyphs drawn directly on the map (richer
+// than the flat sidebar/tooltip icons above).
+function drawBuilding(cx, cy, type, color) {
   const g = svgEl('g', { transform: `translate(${cx},${cy})` });
   const c = color || '#ccc';
 
-  if (type === 'outpost') {
-    // Small house shape
+  if (type === 'stuetzpunkt') {
     g.appendChild(svgEl('rect', { x: -7, y: -4, width: 14, height: 10, fill: c, opacity: '0.9', rx: '1' }));
-    const roof = svgEl('polygon', { points: '-9,-4 0,-12 9,-4', fill: c, opacity: '0.7' });
-    g.appendChild(roof);
+    g.appendChild(svgEl('polygon', { points: '-9,-4 0,-12 9,-4', fill: c, opacity: '0.7' }));
     g.appendChild(svgEl('rect', { x: -2, y: 1, width: 4, height: 5, fill: 'rgba(0,0,0,0.4)', rx: '0.5' }));
-  } else if (type === 'tower') {
-    // Tower with battlements
+  } else if (type === 'turm') {
     g.appendChild(svgEl('rect', { x: -6, y: -12, width: 12, height: 18, fill: c, opacity: '0.9' }));
-    // battlements
-    [-5,-1,3].forEach(bx => {
-      g.appendChild(svgEl('rect', { x: bx, y: -16, width: 3, height: 5, fill: c }));
-    });
+    [-5,-1,3].forEach(bx => g.appendChild(svgEl('rect', { x: bx, y: -16, width: 3, height: 5, fill: c })));
     g.appendChild(svgEl('rect', { x: -2, y: -4, width: 4, height: 6, fill: 'rgba(0,0,0,0.4)' }));
-  } else if (type === 'castle') {
-    // Castle with two towers
+  } else if (type === 'burg') {
     g.appendChild(svgEl('rect', { x: -10, y: -8, width: 20, height: 14, fill: c, opacity: '0.9' }));
     [-10,-4,4].forEach(bx => g.appendChild(svgEl('rect', { x: bx, y: -13, width: 3, height: 6, fill: c })));
-    // Left tower
     g.appendChild(svgEl('rect', { x: -14, y: -14, width: 8, height: 12, fill: c, opacity: '0.85' }));
     g.appendChild(svgEl('rect', { x: -15, y: -18, width: 10, height: 5, fill: c, opacity: '0.7' }));
-    // Right tower
     g.appendChild(svgEl('rect', { x: 6, y: -14, width: 8, height: 12, fill: c, opacity: '0.85' }));
     g.appendChild(svgEl('rect', { x: 5, y: -18, width: 10, height: 5, fill: c, opacity: '0.7' }));
-    // Gate
     g.appendChild(svgEl('rect', { x: -3, y: -3, width: 6, height: 9, fill: 'rgba(0,0,0,0.5)', rx: '2' }));
   }
 
@@ -1085,11 +1143,72 @@ function drawBuilding(svg, cx, cy, type, color) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// BOARD GEOMETRY — territory centres, edge midpoints, 3-way vertices.
+// Mirrors gameState.js's resolveLocation()/VALID_EDGE_KEYS/VALID_VERTEX_KEYS
+// on the server so the spots offered here are always accepted there.
+// ═══════════════════════════════════════════════════════════════
+
+// Every hex corner touched by exactly 3 territories is a valid Burg spot.
+const VALID_VERTICES = (() => {
+  const map = new Map(); // "x.x,y.y" -> Set(territoryId)
+  for (const [id, [cx, cy]] of Object.entries(HEX_POS)) {
+    hexPts(cx, cy, R).forEach(([x, y]) => {
+      const key = `${x.toFixed(1)},${y.toFixed(1)}`;
+      if (!map.has(key)) map.set(key, new Set());
+      map.get(key).add(id);
+    });
+  }
+  const out = [];
+  for (const set of map.values()) {
+    if (set.size !== 3) continue;
+    out.push([...set].sort((a, b) => Number(a) - Number(b)));
+  }
+  return out;
+})();
+
+// Edges: every unique bordering pair, from the territories' adjacentTo lists.
+function computeEdgeList(state) {
+  const seen = new Set();
+  const out = [];
+  for (const [id, t] of Object.entries(state.territories)) {
+    for (const n of t.adjacentTo) {
+      const pair = [id, String(n)].sort((a, b) => Number(a) - Number(b));
+      const key = pair.join('-');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(pair);
+    }
+  }
+  return out;
+}
+
+// For two edge-adjacent regular hexagons the midpoint between their centres
+// is exactly the midpoint of their shared edge.
+function edgeMidpoint(a, b) {
+  const [ax, ay] = HEX_POS[a];
+  const [bx, by] = HEX_POS[b];
+  return [(ax + bx) / 2, (ay + by) / 2];
+}
+
+// The exact corner shared by 3 mutually-adjacent hexes.
+function vertexPoint(triple) {
+  const cornerSets = triple.map(id => hexPts(...HEX_POS[id], R).map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`));
+  const shared = cornerSets[0].find(k => cornerSets[1].includes(k) && cornerSets[2].includes(k));
+  if (!shared) return HEX_POS[triple[0]];
+  return shared.split(',').map(Number);
+}
+
+function locationPixel(territories) {
+  if (territories.length === 1) return HEX_POS[territories[0]];
+  if (territories.length === 2) return edgeMidpoint(territories[0], territories[1]);
+  return vertexPoint(territories);
+}
+
+// ═══════════════════════════════════════════════════════════════
 // RENDER MAP
 // ═══════════════════════════════════════════════════════════════
 function renderMap(state) {
   const svg = document.getElementById('map-svg');
-  // Remove old territory groups
   svg.querySelectorAll('.terr-g, .bld-g').forEach(el => el.remove());
 
   const territories = state.territories;
@@ -1104,7 +1223,6 @@ function renderMap(state) {
 
     const g = svgEl('g', { class: 'terr-g', 'data-id': id });
 
-    // Background hex
     const bg = svgEl('path', {
       d: hexPath(cx, cy, R - 2),
       fill: ownerColor ? hexAlpha(ownerColor, 0.28) : resC.base,
@@ -1113,7 +1231,6 @@ function renderMap(state) {
     });
     g.appendChild(bg);
 
-    // Capital glow ring
     if (terr.isCapital) {
       const ring = svgEl('path', {
         d: hexPath(cx, cy, R - 5),
@@ -1123,19 +1240,13 @@ function renderMap(state) {
         'stroke-dasharray': '5,3',
         opacity: '0.7',
       });
-      ring.style.animation = 'none'; // We'll animate via JS below
       g.appendChild(ring);
-
-      const crown = svgText(cx + R - 16, cy - R + 14, '👑', { 'font-size': '12', 'dominant-baseline': 'auto' });
-      g.appendChild(crown);
+      g.appendChild(svgText(cx + R - 16, cy - R + 14, '👑', { 'font-size': '12', 'dominant-baseline': 'auto' }));
     }
 
     // Resource icon (small, top-left-ish area)
-    const resIcon = { wood: '🪵', stone: '🪨', iron: '⚙️' }[terr.resourceType] || '?';
-    const resT = svgText(cx - R + 14, cy - R + 16, resIcon, { 'font-size': '10', 'dominant-baseline': 'auto' });
-    g.appendChild(resT);
+    g.appendChild(iconSvgNode(terr.resourceType, cx - R + 15, cy - R + 17, 13, 'rgba(200,148,42,0.85)'));
 
-    // Territory number (large, center)
     const numT = svgText(cx, cy - 10, terr.number, {
       fill: ownerColor ? '#fff' : '#c8942a',
       'font-size': '14',
@@ -1144,7 +1255,6 @@ function renderMap(state) {
     });
     g.appendChild(numT);
 
-    // Territory label
     const lblT = svgText(cx, cy + 7, terr.label, {
       fill: ownerColor ? 'rgba(255,255,255,0.85)' : 'rgba(200,148,42,0.6)',
       'font-size': '6.5',
@@ -1152,7 +1262,6 @@ function renderMap(state) {
     });
     g.appendChild(lblT);
 
-    // ID badge
     const idT = svgText(cx + R - 11, cy + R - 13, id, {
       fill: 'rgba(200,148,42,0.35)',
       'font-size': '7',
@@ -1160,33 +1269,23 @@ function renderMap(state) {
     });
     g.appendChild(idT);
 
-    // Mouse events
     g.addEventListener('mouseenter', e => showTooltip(e, id, terr, state));
     g.addEventListener('mouseleave', hideTooltip);
-    g.addEventListener('click', () => onTerritoryClick(id));
-    g.style.cursor = 'pointer';
+    g.style.cursor = 'default';
 
     svg.appendChild(g);
   }
 
-  // Draw buildings ON TOP, at the vertex between this territory and its
-  // neighbors (like Catan settlements sitting between fields).
-  for (const [id, terr] of Object.entries(territories)) {
-    const pos = HEX_POS[id];
-    if (!pos || !terr.buildings.length) continue;
-    const [bx, by] = buildingSpotFor(id);
-    const ownerColor = terr.owner ? (GROUP_COLORS[terr.owner] || '#ccc') : '#ccc';
-
-    terr.buildings.forEach((bld, i) => {
-      // Fan out slightly if more than one building shares the same spot
-      const offsets = [ [0, 0], [-10, -5], [10, -5], [0, -16] ];
-      const [ox, oy] = offsets[Math.min(i, 3)];
-      const bldG = drawBuilding(svg, bx + ox, by + oy, bld.type, ownerColor);
-      bldG.classList.add('bld-g');
-      bldG.style.filter = `drop-shadow(0 1px 2px rgba(0,0,0,0.7))`;
-      bldG.style.pointerEvents = 'none';
-      svg.appendChild(bldG);
-    });
+  // Draw structures on top: Turm at the centre, Stützpunkt at the shared
+  // edge midpoint, Burg at the shared 3-way corner.
+  for (const s of state.structures) {
+    const [x, y] = locationPixel(s.territories);
+    const ownerColor = GROUP_COLORS[s.owner] || '#ccc';
+    const bldG = drawBuilding(x, y, s.type, ownerColor);
+    bldG.classList.add('bld-g');
+    bldG.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))';
+    bldG.style.pointerEvents = 'none';
+    svg.appendChild(bldG);
   }
 }
 
@@ -1197,19 +1296,6 @@ function hexAlpha(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function onTerritoryClick(id) {
-  const sel = document.getElementById('build-terr-sel');
-  if (sel) sel.value = id;
-  // Highlight
-  document.querySelectorAll('.terr-g').forEach(g => g.style.opacity = '1');
-  const clicked = document.querySelector(`.terr-g[data-id="${id}"]`);
-  if (clicked) {
-    document.querySelectorAll('.terr-g').forEach(g => {
-      if (g !== clicked) g.style.opacity = '0.7';
-    });
-  }
-}
-
 // ═══════════════════════════════════════════════════════════════
 // TOOLTIP
 // ═══════════════════════════════════════════════════════════════
@@ -1217,16 +1303,17 @@ function showTooltip(e, id, terr, state) {
   const tt = document.getElementById('tooltip');
   const ownerName = terr.owner ? (state.groups[terr.owner]?.name || terr.owner) : 'Niemand';
   const ownerColor = terr.owner ? GROUP_COLORS[terr.owner] : '#6a5a40';
-  const bldList = terr.buildings.length
-    ? terr.buildings.map(b => state.buildings[b.type]?.label || b.type).join(', ')
+  const here = state.structures.filter(s => s.territories.includes(id));
+  const bldList = here.length
+    ? here.map(s => `${state.buildings[s.type]?.label || s.type} (${state.groups[s.owner]?.name || s.owner})`).join(', ')
     : 'Keine';
-  const resName = { wood: '🪵 Holz', stone: '🪨 Stein', iron: '⚙️ Eisen' }[terr.resourceType] || terr.resourceType;
+  const resName = { wood: 'Holz', stone: 'Stein', iron: 'Eisen' }[terr.resourceType] || terr.resourceType;
 
   tt.innerHTML = `
     <div class="tt-title">${terr.isCapital ? '👑 ' : ''}${terr.label}</div>
-    <div class="tt-res">${resName} · Würfelzahl: <b>${terr.number}</b></div>
+    <div class="tt-res">${iconSvgString(terr.resourceType, 13, 'var(--gold-dim)')} ${resName} · Würfelzahl: <b>${terr.number}</b></div>
     <div class="tt-line" style="color:${ownerColor}">Besitzer: ${ownerName}</div>
-    <div class="tt-line">Gebäude: ${bldList}</div>
+    <div class="tt-line">Bauten: ${bldList}</div>
     <div class="tt-line" style="color:#5a4a30">ID: ${id}</div>
   `;
   tt.style.display = 'block';
@@ -1255,9 +1342,9 @@ function renderScoreboard(state) {
       <div style="flex:1">
         <div class="score-name">${g.name}${!g.joined ? ' <span style="font-size:0.6rem;color:#4a3a20">(noch nicht beigetreten)</span>' : ''}</div>
         <div class="res-chips">
-          <div class="res-chip">🪵 ${res.wood ?? 0}</div>
-          <div class="res-chip">🪨 ${res.stone ?? 0}</div>
-          <div class="res-chip">⚙️ ${res.iron ?? 0}</div>
+          <div class="res-chip">${iconSvgString('wood', 12)} ${res.wood ?? 0}</div>
+          <div class="res-chip">${iconSvgString('stone', 12)} ${res.stone ?? 0}</div>
+          <div class="res-chip">${iconSvgString('iron', 12)} ${res.iron ?? 0}</div>
         </div>
       </div>
       <div style="text-align:right">
@@ -1269,44 +1356,160 @@ function renderScoreboard(state) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BUILD SECTION
+// BUILD SECTION (drag-and-drop source list)
 // ═══════════════════════════════════════════════════════════════
+function computeValidTargets(buildingType) {
+  const state = gameState;
+  if (!state || !session?.groupId) return [];
+  const bldDef = state.buildings[buildingType];
+  if (!bldDef) return [];
+  const myGroup = session.groupId;
+  const occupied = new Set(state.structures.map(s => s.locationId));
+  const targets = [];
+
+  if (bldDef.placement === 'territory') {
+    for (const [id, t] of Object.entries(state.territories)) {
+      if (occupied.has(id) || t.owner !== myGroup) continue;
+      const [x, y] = HEX_POS[id];
+      targets.push({ locationId: id, x, y });
+    }
+  } else if (bldDef.placement === 'edge') {
+    for (const [a, b] of computeEdgeList(state)) {
+      const key = `${a}-${b}`;
+      if (occupied.has(key)) continue;
+      if (state.territories[a].owner !== myGroup || state.territories[b].owner !== myGroup) continue;
+      const [x, y] = edgeMidpoint(a, b);
+      targets.push({ locationId: key, x, y });
+    }
+  } else if (bldDef.placement === 'vertex') {
+    for (const triple of VALID_VERTICES) {
+      const key = triple.join('-');
+      if (occupied.has(key)) continue;
+      if (!triple.every(id => state.territories[id].owner === myGroup)) continue;
+      const [x, y] = vertexPoint(triple);
+      targets.push({ locationId: key, x, y });
+    }
+  }
+  return targets;
+}
+
 function renderBuildSection(state) {
-  const sel = document.getElementById('build-terr-sel');
-  const grid = document.getElementById('bld-grid');
+  const list = document.getElementById('build-list');
   const section = document.getElementById('player-build-section');
 
-  // Hide for admin (they use admin panel)
   if (session?.role === 'admin') {
     section.style.display = 'none';
     return;
   }
 
-  // Populate territory select – only own territories without a building yet
-  // (the admin assigns ownership; players may not claim or restock land themselves)
-  const prevVal = sel.value;
-  const buildable = Object.entries(state.territories)
-    .filter(([, t]) => t.owner === session?.groupId && t.buildings.length === 0);
-
-  sel.innerHTML = buildable.length
-    ? '<option value="">— Gebiet wählen —</option>' +
-      buildable.map(([id, t]) => `<option value="${id}">${t.label}</option>`).join('')
-    : '<option value="">Keine eigenen freien Gebiete</option>';
-  if (prevVal) sel.value = prevVal;
-
-  // Build buttons
-  grid.innerHTML = Object.entries(state.buildings).map(([type, def]) => {
-    const icons = { outpost: '🏠', tower: '🗼', castle: '🏰' };
+  list.innerHTML = Object.entries(state.buildings).map(([type, def]) => {
+    const targets = computeValidTargets(type);
     const costStr = Object.entries(def.cost)
       .filter(([,v]) => v > 0)
-      .map(([k,v]) => `${v}${k==='wood'?'🪵':k==='stone'?'🪨':'⚙️'}`)
-      .join(' ');
-    return `<button class="bld-btn" onclick="doBuild('${type}')">
-      <span class="bld-icon">${icons[type] || '🏗'}</span>
-      ${def.label}
-      <span class="bld-cost">${costStr}</span>
-    </button>`;
+      .map(([k,v]) => `<span class="cost-chip">${iconSvgString(k, 12)} ${v}</span>`)
+      .join('');
+    return `<div class="build-card${targets.length ? '' : ' disabled'}" data-type="${type}" title="Zum Bauen auf die Karte ziehen">
+      <div class="build-card-icon">${iconSvgString(type, 26)}</div>
+      <div class="build-card-info">
+        <div class="build-card-name">${def.label}</div>
+        <div class="build-card-cost">${costStr}</div>
+      </div>
+    </div>`;
   }).join('');
+
+  list.querySelectorAll('.build-card').forEach(card => {
+    card.addEventListener('pointerdown', e => startDrag(card.dataset.type, e));
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG & DROP — drag a building card from the sidebar onto the map
+// ═══════════════════════════════════════════════════════════════
+function svgUserPoint(svg, clientX, clientY) {
+  const pt = svg.createSVGPoint();
+  pt.x = clientX;
+  pt.y = clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function startDrag(type, evt) {
+  evt.preventDefault();
+  const rawTargets = computeValidTargets(type);
+  if (!rawTargets.length) {
+    showToast('Keine gültigen Standorte verfügbar.', true);
+    return;
+  }
+
+  const svg = document.getElementById('map-svg');
+  const ghost = document.createElement('div');
+  ghost.className = 'drag-ghost';
+  ghost.innerHTML = iconSvgString(type, 34);
+  document.body.appendChild(ghost);
+
+  const targets = rawTargets.map(t => {
+    const circle = svgEl('circle', { cx: t.x, cy: t.y, r: 14, class: 'drop-target' });
+    svg.appendChild(circle);
+    return { ...t, el: circle };
+  });
+
+  dragState = { type, ghost, targets, hover: null };
+  moveGhost(evt);
+
+  window.addEventListener('pointermove', onDragMove);
+  window.addEventListener('pointerup', onDragEnd);
+}
+
+function moveGhost(evt) {
+  dragState.ghost.style.left = evt.clientX + 'px';
+  dragState.ghost.style.top = evt.clientY + 'px';
+}
+
+function onDragMove(evt) {
+  if (!dragState) return;
+  moveGhost(evt);
+  const svg = document.getElementById('map-svg');
+  const { x, y } = svgUserPoint(svg, evt.clientX, evt.clientY);
+
+  let closest = null;
+  let closestDist = Infinity;
+  for (const t of dragState.targets) {
+    const d = Math.hypot(t.x - x, t.y - y);
+    if (d < closestDist) { closestDist = d; closest = t; }
+  }
+  const HOVER_RADIUS = 30;
+  const newHover = (closest && closestDist < HOVER_RADIUS) ? closest : null;
+  if (dragState.hover !== newHover) {
+    dragState.targets.forEach(t => t.el.classList.remove('hover'));
+    if (newHover) newHover.el.classList.add('hover');
+    dragState.hover = newHover;
+  }
+}
+
+async function onDragEnd() {
+  window.removeEventListener('pointermove', onDragMove);
+  window.removeEventListener('pointerup', onDragEnd);
+  if (!dragState) return;
+
+  const { type, hover, ghost, targets } = dragState;
+  ghost.remove();
+  targets.forEach(t => t.el.remove());
+  dragState = null;
+
+  if (!hover) return;
+  await doBuildAt(type, hover.locationId);
+}
+
+async function doBuildAt(type, locationId) {
+  try {
+    const res = await apiFetch(`${API}/api/build`, {
+      method: 'POST',
+      body: { buildingType: type, locationId },
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error || 'Fehler', true);
+    updateAll(data.state);
+    showToast(`✅ ${gameState.buildings[type]?.label} gebaut!`);
+  } catch(e) { showToast('Verbindungsfehler', true); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1332,86 +1535,153 @@ function renderEvents(state) {
 function renderAdminPanel(state) {
   if (session?.role !== 'admin') return;
 
-  // Dice config
   document.getElementById('auto-dice-toggle').checked = !!state.autoDice;
   document.getElementById('dice-interval').value = state.diceIntervalMinutes || 15;
 
-  // Codes display
   document.getElementById('admin-codes-display').innerHTML =
     `<b style="color:#6a5a40">Secret Codes:</b><br>` +
     Object.entries(state.groups).map(([id, g]) =>
       `<span style="color:${g.color}">${g.name}</span>: <span style="font-family:monospace">${state.groupCodes?.[id] || '—'}</span>`
     ).join('<br>');
 
-  // Resource editor
+  renderResourceEditor(state);
+  renderStructuresPanel(state);
+  renderTerritoryTable(state);
+}
+
+// Built once, then only patches values on subsequent renders — and never
+// touches an input the admin currently has focused. Rebuilding the whole
+// form on every 3s poll was overwriting whatever the admin was mid-typing.
+function renderResourceEditor(state) {
   const resEd = document.getElementById('res-editor');
-  resEd.innerHTML = Object.entries(state.groups).map(([id, g]) => `
-    <div class="res-group-row">
-      <div class="res-group-dot" style="background:${g.color};box-shadow:0 0 4px ${g.color}"></div>
-      <div class="res-group-name">${g.name}</div>
-      <div class="res-inputs">
-        <div class="res-field">
-          <label>🪵</label>
-          <input class="res-inp" type="number" min="0" id="res-${id}-wood" value="${g.resources.wood ?? 0}"/>
+
+  if (resEd.dataset.built !== '1') {
+    resEd.innerHTML = Object.entries(state.groups).map(([id, g]) => `
+      <div class="res-group-row">
+        <div class="res-group-dot" style="background:${g.color};box-shadow:0 0 4px ${g.color}"></div>
+        <div class="res-group-name">${g.name}</div>
+        <div class="res-inputs">
+          <div class="res-field">${iconSvgString('wood', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-wood" value="${g.resources.wood ?? 0}"/></div>
+          <div class="res-field">${iconSvgString('stone', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-stone" value="${g.resources.stone ?? 0}"/></div>
+          <div class="res-field">${iconSvgString('iron', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-iron" value="${g.resources.iron ?? 0}"/></div>
+          <button class="res-save-btn" onclick="saveResources('${id}')">Speichern</button>
         </div>
-        <div class="res-field">
-          <label>🪨</label>
-          <input class="res-inp" type="number" min="0" id="res-${id}-stone" value="${g.resources.stone ?? 0}"/>
-        </div>
-        <div class="res-field">
-          <label>⚙️</label>
-          <input class="res-inp" type="number" min="0" id="res-${id}-iron" value="${g.resources.iron ?? 0}"/>
-        </div>
-        <button class="res-save-btn" onclick="saveResources('${id}')">Speichern</button>
       </div>
-    </div>
-  `).join('');
+    `).join('');
+    resEd.dataset.built = '1';
+    return;
+  }
 
-  // Territory table
+  for (const [id, g] of Object.entries(state.groups)) {
+    for (const res of ['wood', 'stone', 'iron']) {
+      const inp = document.getElementById(`res-${id}-${res}`);
+      if (!inp || document.activeElement === inp) continue; // don't clobber in-progress typing
+      const serverVal = String(g.resources[res] ?? 0);
+      if (inp.value !== serverVal) inp.value = serverVal;
+    }
+  }
+}
+
+function renderStructuresPanel(state) {
+  const ownerSel = document.getElementById('struct-owner-sel');
+  if (ownerSel.dataset.built !== '1') {
+    ownerSel.innerHTML = Object.entries(state.groups).map(([id, g]) => `<option value="${id}">${g.name}</option>`).join('');
+    ownerSel.dataset.built = '1';
+    document.getElementById('struct-type-sel').addEventListener('change', () => populateLocationOptions(gameState));
+    populateLocationOptions(state);
+  }
+
+  const list = document.getElementById('structures-list');
+  list.innerHTML = state.structures.length
+    ? state.structures.map(s => {
+        const spot = s.territories.map(id => state.territories[id]?.label || id).join(' ↔ ');
+        return `<span class="bld-tag" title="Klicken zum Entfernen" onclick="adminRemoveStructure('${s.id}')">
+          ${state.buildings[s.type]?.label || s.type} · ${state.groups[s.owner]?.name || s.owner} · ${spot} ✕
+        </span>`;
+      }).join('')
+    : '<span style="color:#4a3a20;font-size:0.72rem">Noch keine Bauten.</span>';
+}
+
+function populateLocationOptions(state) {
+  const type = document.getElementById('struct-type-sel').value;
+  const locSel = document.getElementById('struct-loc-sel');
+  const bldDef = state.buildings[type];
+  const occupied = new Set(state.structures.map(s => s.locationId));
+  let options = [];
+
+  if (bldDef.placement === 'territory') {
+    options = Object.entries(state.territories)
+      .filter(([id]) => !occupied.has(id))
+      .map(([id, t]) => ({ value: id, label: t.label }));
+  } else if (bldDef.placement === 'edge') {
+    options = computeEdgeList(state)
+      .filter(([a, b]) => !occupied.has(`${a}-${b}`))
+      .map(([a, b]) => ({ value: `${a}-${b}`, label: `${state.territories[a].label} ↔ ${state.territories[b].label}` }));
+  } else {
+    options = VALID_VERTICES
+      .filter(t => !occupied.has(t.join('-')))
+      .map(t => ({ value: t.join('-'), label: t.map(id => state.territories[id].label).join(' ∩ ') }));
+  }
+
+  locSel.innerHTML = options.length
+    ? options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')
+    : '<option value="">— keine freien Standorte —</option>';
+}
+
+async function adminAddStructure() {
+  const buildingType = document.getElementById('struct-type-sel').value;
+  const locationId = document.getElementById('struct-loc-sel').value;
+  const owner = document.getElementById('struct-owner-sel').value;
+  if (!locationId) return showToast('Kein freier Standort verfügbar.', true);
+
+  const r = await apiFetch(`${API}/api/admin/building`, {
+    method: 'POST',
+    body: { action: 'add', buildingType, locationId, owner },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  populateLocationOptions(data.state);
+  showToast('✅ Baute hinzugefügt');
+}
+
+async function adminRemoveStructure(structureId) {
+  if (!confirm('Baute entfernen?')) return;
+  const r = await apiFetch(`${API}/api/admin/building`, {
+    method: 'POST',
+    body: { action: 'remove', structureId },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Baute entfernt');
+}
+
+function renderTerritoryTable(state) {
   const tbody = document.getElementById('terr-admin-tbody');
-  const resName = { wood: '🪵 Holz', stone: '🪨 Stein', iron: '⚙️ Eisen' };
+  const resName = { wood: 'Holz', stone: 'Stein', iron: 'Eisen' };
   const groupOptions = '<option value="">Niemand</option>' +
-    Object.entries(state.groups).map(([id, g]) =>
-      `<option value="${id}">${g.name}</option>`
-    ).join('');
+    Object.entries(state.groups).map(([id, g]) => `<option value="${id}">${g.name}</option>`).join('');
 
-  tbody.innerHTML = Object.entries(state.territories).map(([id, t]) => {
-    const bldTags = t.buildings.map((b, i) => {
-      const lbl = state.buildings[b.type]?.label || b.type;
-      return `<span class="bld-tag" title="Klicken zum Entfernen" onclick="adminRemoveBuilding('${id}', ${i})">${lbl} ✕</span>`;
-    }).join('');
+  if (tbody.dataset.built !== '1') {
+    tbody.innerHTML = Object.entries(state.territories).map(([id, t]) => `
+      <tr>
+        <td style="color:#6a5a40;font-family:monospace">${id}</td>
+        <td style="color:#c8a860;font-size:0.78rem">${t.isCapital ? '👑 ' : ''}${t.label}</td>
+        <td style="font-size:0.72rem">${iconSvgString(t.resourceType, 12)} ${resName[t.resourceType] || t.resourceType}</td>
+        <td style="font-family:monospace;color:var(--gold)">${t.number}</td>
+        <td id="terr-owner-cell-${id}">
+          <select class="terr-owner-sel" onchange="adminSetOwner('${id}', this.value)">${groupOptions}</select>
+        </td>
+      </tr>
+    `).join('');
+    tbody.dataset.built = '1';
+  }
 
-    const ownerSel = `<select class="terr-owner-sel" onchange="adminSetOwner('${id}', this.value)">
-      ${groupOptions}
-    </select>`;
-
-    const addBld = `<select class="add-bld-sel" onchange="adminAddBuilding('${id}', this.value); this.value=''">
-      <option value="">+ Gebäude</option>
-      ${Object.entries(state.buildings).map(([type, def]) =>
-        `<option value="${type}">${def.label}</option>`
-      ).join('')}
-    </select>`;
-
-    return `<tr>
-      <td style="color:#6a5a40;font-family:monospace">${id}</td>
-      <td style="color:#c8a860;font-size:0.78rem">${t.isCapital ? '👑 ' : ''}${t.label}</td>
-      <td style="font-size:0.72rem">${resName[t.resourceType] || t.resourceType}</td>
-      <td style="font-family:monospace;color:var(--gold)">${t.number}</td>
-      <td id="terr-owner-cell-${id}">${ownerSel}</td>
-      <td>
-        <div class="bld-tags" id="bld-tags-${id}">${bldTags || '<span style="color:#4a3a20;font-size:0.7rem">—</span>'}</div>
-      </td>
-      <td>${addBld}</td>
-    </tr>`;
-  }).join('');
-
-  // Set current owner values
   for (const [id, t] of Object.entries(state.territories)) {
     const cell = document.getElementById(`terr-owner-cell-${id}`);
-    if (cell) {
-      const sel = cell.querySelector('select');
-      if (sel) sel.value = t.owner || '';
-    }
+    const sel = cell?.querySelector('select');
+    if (sel && document.activeElement !== sel) sel.value = t.owner || '';
   }
 }
 
@@ -1421,7 +1691,6 @@ function renderAdminPanel(state) {
 function updateAll(state) {
   gameState = state;
 
-  // Header
   document.getElementById('hdr-dice').textContent = state.lastDiceRoll ?? '—';
   document.getElementById('hdr-auto-badge').style.display = state.autoDice ? 'block' : 'none';
 
@@ -1486,12 +1755,10 @@ function startApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
 
-  // Setup header badge
   const badge = document.getElementById('hdr-player-badge');
   if (session.role === 'player' && session.groupId) {
     badge.style.display = 'flex';
     document.getElementById('hdr-player-name').textContent = session.name;
-    // Set color when state loads
   } else if (session.role === 'admin') {
     badge.style.display = 'flex';
     document.getElementById('hdr-dot').style.background = '#c8942a';
@@ -1515,7 +1782,6 @@ async function poll() {
     const state = await res.json();
     updateAll(state);
 
-    // Update player dot color
     if (session.role === 'player' && session.groupId && state.groups[session.groupId]) {
       document.getElementById('hdr-dot').style.background = state.groups[session.groupId].color;
     }
@@ -1531,25 +1797,6 @@ function startPolling() {
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   if (uiTimer)   { clearInterval(uiTimer);   uiTimer = null; }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PLAYER ACTIONS
-// ═══════════════════════════════════════════════════════════════
-async function doBuild(type) {
-  const terrId = document.getElementById('build-terr-sel').value;
-  if (!terrId) return showToast('Bitte ein Territorium wählen.', true);
-
-  try {
-    const res = await apiFetch(`${API}/api/build`, {
-      method: 'POST',
-      body: { territoryId: terrId, buildingType: type },
-    });
-    const data = await res.json();
-    if (!res.ok) return showToast(data.error || 'Fehler', true);
-    updateAll(data.state);
-    showToast(`✅ ${gameState.buildings[type]?.label} gebaut!`);
-  } catch(e) { showToast('Verbindungsfehler', true); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1574,7 +1821,6 @@ async function saveResources(groupId) {
   }
 
   showToast(`✅ Ressourcen gespeichert`);
-  // Reload state
   const r2 = await apiFetch(`${API}/api/game`);
   const d2 = await r2.json();
   updateAll(d2);
@@ -1589,30 +1835,6 @@ async function adminSetOwner(territoryId, newOwner) {
   if (!r.ok) return showToast(data.error || 'Fehler', true);
   updateAll(data.state);
   showToast('✅ Besitzer geändert');
-}
-
-async function adminAddBuilding(territoryId, buildingType) {
-  if (!buildingType) return;
-  const r = await apiFetch(`${API}/api/admin/building`, {
-    method: 'POST',
-    body: { territoryId, action: 'add', buildingType },
-  });
-  const data = await r.json();
-  if (!r.ok) return showToast(data.error || 'Fehler', true);
-  updateAll(data.state);
-  showToast('✅ Gebäude hinzugefügt');
-}
-
-async function adminRemoveBuilding(territoryId, index) {
-  if (!confirm('Gebäude entfernen?')) return;
-  const r = await apiFetch(`${API}/api/admin/building`, {
-    method: 'POST',
-    body: { territoryId, action: 'remove', index },
-  });
-  const data = await r.json();
-  if (!r.ok) return showToast(data.error || 'Fehler', true);
-  updateAll(data.state);
-  showToast('✅ Gebäude entfernt');
 }
 
 async function adminDice() {

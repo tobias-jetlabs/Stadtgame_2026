@@ -21,6 +21,10 @@ function load() {
     state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     save();
   }
+
+  // Migrate saves from before the structures[] rework (old territory.buildings
+  // arrays are simply dropped — they used building types that no longer exist).
+  if (!Array.isArray(state.structures)) state.structures = [];
 }
 
 function save() {
@@ -50,11 +54,13 @@ function recalcPoints() {
   const bldDefs = state.buildings;
   for (const g of Object.keys(state.groups)) state.groups[g].points = 0;
   for (const territory of Object.values(state.territories)) {
-    if (!territory.owner) continue;
-    if (territory.isCapital) state.groups[territory.owner].points += 10;
-    for (const bld of territory.buildings) {
-      state.groups[territory.owner].points += (bldDefs[bld.type]?.points || 0);
-    }
+    if (territory.owner && territory.isCapital) state.groups[territory.owner].points += 10;
+  }
+  // Structure points always go to the structure's own owner, independent of
+  // who currently owns the territory/territories it sits on/between.
+  for (const s of state.structures) {
+    if (!state.groups[s.owner]) continue;
+    state.groups[s.owner].points += (bldDefs[s.type]?.points || 0);
   }
   save();
 }

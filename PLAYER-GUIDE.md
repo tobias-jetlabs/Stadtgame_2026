@@ -127,7 +127,7 @@ Nächster in: 12:45
 ### Nach einem Wurf
 - Alle Territorien mit dieser Zahl produzieren
 - Deine Gebäude auf diesen Territorien → +Ressource
-- Event-Log zeigt: "🎲 Würfelwurf: 6. Gruppe Rot: +2 Holz"
+- Event-Log zeigt: "🎲 Würfelwurf: 6. Uri: +2 Holz"
 
 ---
 
@@ -147,9 +147,9 @@ Unten rechts: **"📜 Ereignisse"**
 
 Zeigt die letzten 40 Aktionen:
 ```
-14:15  🏗 Gruppe Rot hat in Marktplatz einen Vorposten gebaut.
-14:18  🎲 Würfelwurf: 8. Gruppe Blau: +3 Holz
-14:22  ⚔️ Gruppe Grün hat Territorium 7 von Gruppe Rot erobert!
+14:15  🏗 Uri hat in Marktplatz einen Vorposten gebaut.
+14:18  🎲 Würfelwurf: 8. Schwyz: +3 Holz
+14:22  ⚔️ Unterwalden hat Territorium 7 von Uri erobert!
 ```
 
 ---

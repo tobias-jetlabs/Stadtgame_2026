@@ -2,14 +2,12 @@
 
 // ─── Secret codes ─────────────────────────────────────────────────────────────
 // These are set once and never change. Edit before first run.
-const ADMIN_CODE = 'HABSBURG-ADMIN-2025';
+const ADMIN_CODE = 'ADMIN2026';
 const GROUP_CODES = {
-  red:    'ROT-ADLER-77',
-  blue:   'BLAU-WELLE-42',
-  green:  'GRUEN-EICHE-13',
-  yellow: 'GELB-SONNE-88',
-  purple: 'LILA-BURG-55',
-  orange: 'ORANGE-WOLF-31',
+  uri:         'URI2026',
+  schwyz:      'SCHWYZ2026',
+  unterwalden: 'UNTERWALDEN2026',
+  luzern:      'LUZERN2026',
 };
 
 // ─── Territory layout ─────────────────────────────────────────────────────────
@@ -29,12 +27,10 @@ const DEFAULT_STATE = {
   autoDice: true,
 
   groups: {
-    red:    { name: 'Gruppe Rot',    color: '#e74c3c', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
-    blue:   { name: 'Gruppe Blau',   color: '#2980b9', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
-    green:  { name: 'Gruppe Grün',   color: '#27ae60', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
-    yellow: { name: 'Gruppe Gelb',   color: '#d4ac0d', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
-    purple: { name: 'Gruppe Lila',   color: '#8e44ad', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
-    orange: { name: 'Gruppe Orange', color: '#e67e22', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
+    uri:         { name: 'Uri',         color: '#e74c3c', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
+    schwyz:      { name: 'Schwyz',      color: '#2980b9', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
+    unterwalden: { name: 'Unterwalden', color: '#27ae60', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
+    luzern:      { name: 'Luzern',      color: '#d4ac0d', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },
   },
 
   // 24 territories in hex grid

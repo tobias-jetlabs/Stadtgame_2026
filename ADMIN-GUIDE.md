@@ -11,14 +11,12 @@ Kompletter Guide für Spielleiter/Administrator.
 Bearbeite `gameState.js` vor dem **ersten Start:**
 
 ```javascript
-const ADMIN_CODE = 'HABSBURG-ADMIN-2025';  // ← Dein Admin-Passwort
+const ADMIN_CODE = 'ADMIN2026';  // ← Dein Admin-Passwort
 const GROUP_CODES = {
-  red:    'ROT-ADLER-77',      // Gruppe 1
-  blue:   'BLAU-WELLE-42',     // Gruppe 2
-  green:  'GRUEN-EICHE-13',    // Gruppe 3
-  yellow: 'GELB-SONNE-88',     // Gruppe 4
-  purple: 'LILA-BURG-55',      // Gruppe 5
-  orange: 'ORANGE-WOLF-31',    // Gruppe 6
+  uri:         'URI2026',          // Gruppe 1
+  schwyz:      'SCHWYZ2026',       // Gruppe 2
+  unterwalden: 'UNTERWALDEN2026',  // Gruppe 3
+  luzern:      'LUZERN2026',       // Gruppe 4
 };
 ```
 
@@ -29,8 +27,8 @@ const GROUP_CODES = {
 In `gameState.js`:
 ```javascript
 groups: {
-  red: { 
-    name: 'Gruppe Rot', 
+  uri: { 
+    name: 'Uri', 
     resources: { wood: 20, stone: 10, iron: 5 },  // ← Startressourcen
     points: 0,
     joined: false
@@ -58,7 +56,7 @@ npm start
 
 ### Du (Admin) anmelden
 ```
-Code eingeben: HABSBURG-ADMIN-2025
+Code eingeben: ADMIN2026
 ```
 
 → Admin-Panel (Reiter "⚙ Admin") wird sichtbar
@@ -117,10 +115,10 @@ Spalten:
 - Neues Gebäude: "Gebäude" Dropdown → Typ wählen
 - Über diese Admin-Tabelle kannst du (im Gegensatz zu Spielern) auch mehrere Gebäude auf ein Gebiet setzen
 
-**Beispiel: Gruppe Rot soll Territorium 5 bekommen**
-1. Dropdown "Besitzer" auf "Gruppe Rot" setzen
-2. Gruppe Rot kann nun im Spieler-Tab auf Territorium 5 ein Gebäude bauen (solange keins vorhanden ist)
-3. Nächster Würfelwurf: Gruppe Rot bekommt +1 Stein pro Gebäude (falls Zahl 4)
+**Beispiel: Uri soll Territorium 5 bekommen**
+1. Dropdown "Besitzer" auf "Uri" setzen
+2. Uri kann nun im Spieler-Tab auf Territorium 5 ein Gebäude bauen (solange keins vorhanden ist)
+3. Nächster Würfelwurf: Uri bekommt +1 Stein pro Gebäude (falls Zahl 4)
 
 ---
 
@@ -138,7 +136,7 @@ Spalten:
 1. **Auto-Würfeln läuft** (wenn aktiviert)
    - Alle 15 Min (konfigurierbar) automatischer Wurf
    - Ressourcen verteilt sich automatisch
-   - Event-Log zeigt: "🎲 Würfelwurf: 6. Gruppe Rot: +2 Holz"
+   - Event-Log zeigt: "🎲 Würfelwurf: 6. Uri: +2 Holz"
 
 2. **Spieler bauen**
    - Spieler wählen Territorium → Gebäude-Typ
@@ -160,9 +158,9 @@ Spalten:
 ### Event-Log lesen
 Rechts im Spielfeld-Tab, "📜 Ereignisse":
 ```
-14:15  🏗 Gruppe Rot hat in Marktplatz einen/eine Vorposten gebaut.
-14:18  🎲 Würfelwurf: 8. Gruppe Blau: +3 Holz
-14:20  🔧 Admin: Gruppe Gelb → Stein = 25
+14:15  🏗 Uri hat in Marktplatz einen/eine Vorposten gebaut.
+14:18  🎲 Würfelwurf: 8. Schwyz: +3 Holz
+14:20  🔧 Admin: Luzern → Stein = 25
 ```
 
 ### Live-Rangliste
@@ -175,10 +173,10 @@ Ressourcen aller Gruppen sind für Admin **und** alle Spieler als exakte Zahlen 
 
 ## ⚠️ Häufige Szenarien
 
-### "Gruppe Rot hat nicht genug Ressourcen zum Bauen"
+### "Uri hat nicht genug Ressourcen zum Bauen"
 **Lösung:**
 1. Admin-Panel → Ressourcen-Bereich
-2. Bei Gruppe Rot "Holz" auf 50 setzen
+2. Bei Uri "Holz" auf 50 setzen
 3. "Speichern"
 4. Spieler kann jetzt bauen
 
@@ -237,8 +235,8 @@ PORT=8080 npm start
 Terminal zeigt:
 ```
 [DB] Loaded game state from disk.
-🎲 Würfelwurf: 6. Gruppe Rot: +2 Holz
-🔧 Admin: Gruppe Rot → Stein = 50
+🎲 Würfelwurf: 6. Uri: +2 Holz
+🔧 Admin: Uri → Stein = 50
 ```
 
 ---
@@ -258,7 +256,7 @@ A: Nein. `gameState.js` muss vor dem Start editiert werden. Danach Server neu st
 A: Auto-Dice pausiert. Nur manuelle Würfe funktionieren.
 
 **F: Wie viele Gruppen sind möglich?**
-A: Im Default: 6 (rot, blau, grün, gelb, lila, orange). Mehr im Code hinzufügbar.
+A: Im Default: 4 (Uri, Schwyz, Unterwalden, Luzern). Mehr im Code hinzufügbar.
 
 **F: Sehen Spieler die Ressourcen anderer Gruppen?**
 A: Ja, alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).

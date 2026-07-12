@@ -21,17 +21,15 @@ Browser öffnen, Secret Code eingeben → Spielfeld sehen!
 
 ### Admin (hat vollständige Kontrolle)
 ```
-HABSBURG-ADMIN-2025
+ADMIN2026
 ```
 
 ### Gruppen (pro Gruppe unterschiedlich)
 ```
-rot:     ROT-ADLER-77
-blau:    BLAU-WELLE-42
-grün:    GRUEN-EICHE-13
-gelb:    GELB-SONNE-88
-lila:    LILA-BURG-55
-orange:  ORANGE-WOLF-31
+uri:          URI2026
+schwyz:       SCHWYZ2026
+unterwalden:  UNTERWALDEN2026
+luzern:       LUZERN2026
 ```
 
 **Diese Codes sind persistent** — sie ändern sich nicht während des Spiels.
@@ -109,8 +107,8 @@ Alle Requests brauchen Header: `x-auth-code: <SECRET>`
 #### Login / Identifizierung
 ```
 POST /stadtgame/api/auth
-{ "code": "ROT-ADLER-77" }
-→ { role: "player", groupId: "red", name: "Gruppe Rot" }
+{ "code": "URI2026" }
+→ { role: "player", groupId: "uri", name: "Uri" }
 ```
 
 #### Spielfeld abrufen
@@ -133,13 +131,13 @@ Funktioniert nur, wenn das Territorium bereits vom Admin der eigenen Gruppe zuge
 #### Ressourcen anpassen
 ```
 POST /stadtgame/api/admin/resources
-{ "groupId": "red", "resource": "wood", "value": 50 }
+{ "groupId": "uri", "resource": "wood", "value": 50 }
 ```
 
 #### Territorium-Besitzer ändern
 ```
 POST /stadtgame/api/admin/territory
-{ "territoryId": "5", "owner": "red" }
+{ "territoryId": "5", "owner": "uri" }
 ```
 
 #### Gebäude hinzufügen/entfernen
@@ -175,8 +173,8 @@ Bearbeite `gameState.js` **VOR dem ersten Start:**
 ```javascript
 const ADMIN_CODE = 'MEIN-ADMIN-CODE';
 const GROUP_CODES = {
-  red:    'GRUPPE-ROT-CODE',
-  blue:   'GRUPPE-BLAU-CODE',
+  uri:    'GRUPPE-URI-CODE',
+  schwyz: 'GRUPPE-SCHWYZ-CODE',
   // ...
 };
 ```
@@ -240,7 +238,7 @@ server {
 → `gameState.js` prüfen, Server neu starten
 
 ### Admin-Panel nicht sichtbar?
-→ Mit Admin-Code (`HABSBURG-ADMIN-2025`) anmelden
+→ Mit Admin-Code (`ADMIN2026`) anmelden
 
 ### Ressourcen-Updates bei anderen Spielern nicht sichtbar?
 → Frontend polled alle 3 Sekunden. Browser-Cache evtl. leeren.

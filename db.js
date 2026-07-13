@@ -53,9 +53,6 @@ function addEvent(message) {
 function recalcPoints() {
   const bldDefs = state.buildings;
   for (const g of Object.keys(state.groups)) state.groups[g].points = 0;
-  for (const territory of Object.values(state.territories)) {
-    if (territory.owner && territory.isCapital) state.groups[territory.owner].points += 10;
-  }
   // Structure points always go to the structure's own owner, independent of
   // who currently owns the territory/territories it sits on/between.
   for (const s of state.structures) {

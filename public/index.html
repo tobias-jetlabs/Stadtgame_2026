@@ -379,7 +379,6 @@ header {
 
 .build-card:hover { background: rgba(200,148,42,0.16); border-color: var(--gold); }
 .build-card:active { cursor: grabbing; }
-.build-card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
 .build-card-icon { flex-shrink: 0; color: var(--gold2); }
 .build-card-info { flex: 1; min-width: 0; }
@@ -414,6 +413,8 @@ header {
   stroke-dasharray: 3,2;
 }
 .drop-target.hover { fill: rgba(200,148,42,0.5); stroke-width: 2.5; stroke-dasharray: none; }
+.drop-target.blocked { fill: rgba(150,60,60,0.06); stroke: #7a4040; stroke-width: 1.2; }
+.drop-target.blocked.hover { fill: rgba(190,60,60,0.4); stroke: #c04040; stroke-width: 2.5; stroke-dasharray: none; }
 
 /* Event log */
 .event-log {
@@ -629,20 +630,6 @@ header {
   text-align: right;
 }
 
-.res-save-btn {
-  padding: 4px 10px;
-  background: rgba(200,148,42,0.1);
-  border: 1px solid rgba(200,148,42,0.25);
-  color: var(--gold2);
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 0.72rem;
-  transition: all 0.15s;
-  flex-shrink: 0;
-}
-
-.res-save-btn:hover { background: rgba(200,148,42,0.22); }
-
 /* Territory admin table */
 .terr-admin-table {
   width: 100%;
@@ -707,11 +694,15 @@ header {
   border: 1px solid rgba(200,148,42,0.2);
   border-radius: 3px;
   padding: 3px 6px;
-  cursor: pointer;
-  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.bld-tag:hover { background: rgba(180,40,40,0.25); border-color: #c04040; color: #e08080; }
+.bld-owner-sel { font-size: 0.68rem; padding: 2px 4px; }
+
+.bld-tag-x { cursor: pointer; color: #9a8a60; transition: color 0.12s; }
+.bld-tag-x:hover { color: #e08080; }
 
 /* ═══════════════════════════════════════════ TOOLTIP */
 #tooltip {
@@ -1231,23 +1222,16 @@ function renderMap(state) {
     });
     g.appendChild(bg);
 
-    if (terr.isCapital) {
-      const ring = svgEl('path', {
-        d: hexPath(cx, cy, R - 5),
-        fill: 'none',
-        stroke: '#c8942a',
-        'stroke-width': '2',
-        'stroke-dasharray': '5,3',
-        opacity: '0.7',
-      });
-      g.appendChild(ring);
-      g.appendChild(svgText(cx + R - 16, cy - R + 14, '👑', { 'font-size': '12', 'dominant-baseline': 'auto' }));
-    }
+    // Resource badge: a colored disc dead-center in the territory, sized
+    // bigger than any building glyph so its rim still peeks out from behind
+    // a Turm/Stützpunkt/Burg placed on the exact same spot. Drawn before the
+    // number/label (which sit above/below it) and before the structures
+    // layer (drawn in a separate pass further down, on top of everything).
+    const resAccent = resC.accent;
+    g.appendChild(svgEl('circle', { cx, cy, r: 19, fill: hexAlpha(resAccent, 0.32), stroke: resAccent, 'stroke-width': '1.8' }));
+    g.appendChild(iconSvgNode(terr.resourceType, cx, cy, 22, resAccent));
 
-    // Resource icon (small, top-left-ish area)
-    g.appendChild(iconSvgNode(terr.resourceType, cx - R + 15, cy - R + 17, 13, 'rgba(200,148,42,0.85)'));
-
-    const numT = svgText(cx, cy - 10, terr.number, {
+    const numT = svgText(cx, cy - 30, terr.number, {
       fill: ownerColor ? '#fff' : '#c8942a',
       'font-size': '14',
       'font-weight': 'bold',
@@ -1255,7 +1239,7 @@ function renderMap(state) {
     });
     g.appendChild(numT);
 
-    const lblT = svgText(cx, cy + 7, terr.label, {
+    const lblT = svgText(cx, cy + 32, terr.label, {
       fill: ownerColor ? 'rgba(255,255,255,0.85)' : 'rgba(200,148,42,0.6)',
       'font-size': '6.5',
       'font-family': 'Georgia, serif',
@@ -1310,7 +1294,7 @@ function showTooltip(e, id, terr, state) {
   const resName = { wood: 'Holz', stone: 'Stein', iron: 'Eisen' }[terr.resourceType] || terr.resourceType;
 
   tt.innerHTML = `
-    <div class="tt-title">${terr.isCapital ? '👑 ' : ''}${terr.label}</div>
+    <div class="tt-title">${terr.label}</div>
     <div class="tt-res">${iconSvgString(terr.resourceType, 13, 'var(--gold-dim)')} ${resName} · Würfelzahl: <b>${terr.number}</b></div>
     <div class="tt-line" style="color:${ownerColor}">Besitzer: ${ownerName}</div>
     <div class="tt-line">Bauten: ${bldList}</div>
@@ -1358,36 +1342,44 @@ function renderScoreboard(state) {
 // ═══════════════════════════════════════════════════════════════
 // BUILD SECTION (drag-and-drop source list)
 // ═══════════════════════════════════════════════════════════════
-function computeValidTargets(buildingType) {
+// Returns EVERY spot of the right kind for this building type (not just the
+// ones the player is allowed to build on) so the drag can always start and
+// the player gets an explicit reason instead of a silently disabled card.
+// Each target carries `allowed` (owns every territory it spans, and it's
+// still unoccupied) plus a `reason` to show when a blocked spot is dropped on.
+function computeAllTargets(buildingType) {
   const state = gameState;
-  if (!state || !session?.groupId) return [];
+  if (!state) return [];
   const bldDef = state.buildings[buildingType];
   if (!bldDef) return [];
-  const myGroup = session.groupId;
+  const myGroup = session?.groupId;
   const occupied = new Set(state.structures.map(s => s.locationId));
   const targets = [];
 
+  function classify(key, ownsAll) {
+    if (occupied.has(key)) return { allowed: false, reason: 'Dort steht bereits eine Baute.' };
+    if (!ownsAll) return { allowed: false, reason: 'Du besitzt nicht alle für diese Baute nötigen Gebiete.' };
+    return { allowed: true, reason: null };
+  }
+
   if (bldDef.placement === 'territory') {
     for (const [id, t] of Object.entries(state.territories)) {
-      if (occupied.has(id) || t.owner !== myGroup) continue;
       const [x, y] = HEX_POS[id];
-      targets.push({ locationId: id, x, y });
+      targets.push({ locationId: id, x, y, ...classify(id, t.owner === myGroup) });
     }
   } else if (bldDef.placement === 'edge') {
     for (const [a, b] of computeEdgeList(state)) {
       const key = `${a}-${b}`;
-      if (occupied.has(key)) continue;
-      if (state.territories[a].owner !== myGroup || state.territories[b].owner !== myGroup) continue;
       const [x, y] = edgeMidpoint(a, b);
-      targets.push({ locationId: key, x, y });
+      const ownsAll = state.territories[a].owner === myGroup && state.territories[b].owner === myGroup;
+      targets.push({ locationId: key, x, y, ...classify(key, ownsAll) });
     }
   } else if (bldDef.placement === 'vertex') {
     for (const triple of VALID_VERTICES) {
       const key = triple.join('-');
-      if (occupied.has(key)) continue;
-      if (!triple.every(id => state.territories[id].owner === myGroup)) continue;
       const [x, y] = vertexPoint(triple);
-      targets.push({ locationId: key, x, y });
+      const ownsAll = triple.every(id => state.territories[id].owner === myGroup);
+      targets.push({ locationId: key, x, y, ...classify(key, ownsAll) });
     }
   }
   return targets;
@@ -1403,12 +1395,11 @@ function renderBuildSection(state) {
   }
 
   list.innerHTML = Object.entries(state.buildings).map(([type, def]) => {
-    const targets = computeValidTargets(type);
     const costStr = Object.entries(def.cost)
       .filter(([,v]) => v > 0)
       .map(([k,v]) => `<span class="cost-chip">${iconSvgString(k, 12)} ${v}</span>`)
       .join('');
-    return `<div class="build-card${targets.length ? '' : ' disabled'}" data-type="${type}" title="Zum Bauen auf die Karte ziehen">
+    return `<div class="build-card" data-type="${type}" title="Zum Bauen auf die Karte ziehen">
       <div class="build-card-icon">${iconSvgString(type, 26)}</div>
       <div class="build-card-info">
         <div class="build-card-name">${def.label}</div>
@@ -1434,11 +1425,8 @@ function svgUserPoint(svg, clientX, clientY) {
 
 function startDrag(type, evt) {
   evt.preventDefault();
-  const rawTargets = computeValidTargets(type);
-  if (!rawTargets.length) {
-    showToast('Keine gültigen Standorte verfügbar.', true);
-    return;
-  }
+  const rawTargets = computeAllTargets(type);
+  if (!rawTargets.length) return; // no spots of this kind exist on the board at all
 
   const svg = document.getElementById('map-svg');
   const ghost = document.createElement('div');
@@ -1446,8 +1434,11 @@ function startDrag(type, evt) {
   ghost.innerHTML = iconSvgString(type, 34);
   document.body.appendChild(ghost);
 
+  // Every spot is shown and droppable — allowed ones in gold, blocked ones
+  // dimmed/red — so dropping always gives a concrete reason instead of the
+  // card just not reacting.
   const targets = rawTargets.map(t => {
-    const circle = svgEl('circle', { cx: t.x, cy: t.y, r: 14, class: 'drop-target' });
+    const circle = svgEl('circle', { cx: t.x, cy: t.y, r: 14, class: t.allowed ? 'drop-target' : 'drop-target blocked' });
     svg.appendChild(circle);
     return { ...t, el: circle };
   });
@@ -1495,7 +1486,12 @@ async function onDragEnd() {
   targets.forEach(t => t.el.remove());
   dragState = null;
 
-  if (!hover) return;
+  if (!hover) return; // dropped outside any spot — silently cancel
+
+  if (!hover.allowed) {
+    showToast(hover.reason || 'Hier darfst du nicht bauen.', true);
+    return;
+  }
   await doBuildAt(type, hover.locationId);
 }
 
@@ -1552,6 +1548,8 @@ function renderAdminPanel(state) {
 // Built once, then only patches values on subsequent renders — and never
 // touches an input the admin currently has focused. Rebuilding the whole
 // form on every 3s poll was overwriting whatever the admin was mid-typing.
+// Each field saves itself directly on change (blur/Enter) — no separate
+// "Speichern" button, no batching multiple fields into one click.
 function renderResourceEditor(state) {
   const resEd = document.getElementById('res-editor');
 
@@ -1561,10 +1559,9 @@ function renderResourceEditor(state) {
         <div class="res-group-dot" style="background:${g.color};box-shadow:0 0 4px ${g.color}"></div>
         <div class="res-group-name">${g.name}</div>
         <div class="res-inputs">
-          <div class="res-field">${iconSvgString('wood', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-wood" value="${g.resources.wood ?? 0}"/></div>
-          <div class="res-field">${iconSvgString('stone', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-stone" value="${g.resources.stone ?? 0}"/></div>
-          <div class="res-field">${iconSvgString('iron', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-iron" value="${g.resources.iron ?? 0}"/></div>
-          <button class="res-save-btn" onclick="saveResources('${id}')">Speichern</button>
+          <div class="res-field">${iconSvgString('wood', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-wood" value="${g.resources.wood ?? 0}" onchange="setResource('${id}','wood',this.value)"/></div>
+          <div class="res-field">${iconSvgString('stone', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-stone" value="${g.resources.stone ?? 0}" onchange="setResource('${id}','stone',this.value)"/></div>
+          <div class="res-field">${iconSvgString('iron', 13)}<input class="res-inp" type="number" min="0" id="res-${id}-iron" value="${g.resources.iron ?? 0}" onchange="setResource('${id}','iron',this.value)"/></div>
         </div>
       </div>
     `).join('');
@@ -1582,6 +1579,18 @@ function renderResourceEditor(state) {
   }
 }
 
+async function setResource(groupId, resource, value) {
+  const val = Math.max(0, parseInt(value) || 0);
+  const r = await apiFetch(`${API}/api/admin/resources`, {
+    method: 'POST',
+    body: { groupId, resource, value: val },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Gespeichert');
+}
+
 function renderStructuresPanel(state) {
   const ownerSel = document.getElementById('struct-owner-sel');
   if (ownerSel.dataset.built !== '1') {
@@ -1592,11 +1601,16 @@ function renderStructuresPanel(state) {
   }
 
   const list = document.getElementById('structures-list');
+  const groupOptions = g => Object.entries(state.groups)
+    .map(([id, gr]) => `<option value="${id}" ${id === g ? 'selected' : ''}>${gr.name}</option>`).join('');
+
   list.innerHTML = state.structures.length
     ? state.structures.map(s => {
         const spot = s.territories.map(id => state.territories[id]?.label || id).join(' ↔ ');
-        return `<span class="bld-tag" title="Klicken zum Entfernen" onclick="adminRemoveStructure('${s.id}')">
-          ${state.buildings[s.type]?.label || s.type} · ${state.groups[s.owner]?.name || s.owner} · ${spot} ✕
+        return `<span class="bld-tag">
+          ${state.buildings[s.type]?.label || s.type} · ${spot}
+          <select class="adm-select bld-owner-sel" onchange="adminTransferStructure('${s.id}', this.value)">${groupOptions(s.owner)}</select>
+          <span class="bld-tag-x" title="Baute entfernen" onclick="adminRemoveStructure('${s.id}')">✕</span>
         </span>`;
       }).join('')
     : '<span style="color:#4a3a20;font-size:0.72rem">Noch keine Bauten.</span>';
@@ -1657,6 +1671,17 @@ async function adminRemoveStructure(structureId) {
   showToast('✅ Baute entfernt');
 }
 
+async function adminTransferStructure(structureId, owner) {
+  const r = await apiFetch(`${API}/api/admin/building`, {
+    method: 'POST',
+    body: { action: 'transfer', structureId, owner },
+  });
+  const data = await r.json();
+  if (!r.ok) return showToast(data.error || 'Fehler', true);
+  updateAll(data.state);
+  showToast('✅ Besitzer geändert');
+}
+
 function renderTerritoryTable(state) {
   const tbody = document.getElementById('terr-admin-tbody');
   const resName = { wood: 'Holz', stone: 'Stein', iron: 'Eisen' };
@@ -1667,7 +1692,7 @@ function renderTerritoryTable(state) {
     tbody.innerHTML = Object.entries(state.territories).map(([id, t]) => `
       <tr>
         <td style="color:#6a5a40;font-family:monospace">${id}</td>
-        <td style="color:#c8a860;font-size:0.78rem">${t.isCapital ? '👑 ' : ''}${t.label}</td>
+        <td style="color:#c8a860;font-size:0.78rem">${t.label}</td>
         <td style="font-size:0.72rem">${iconSvgString(t.resourceType, 12)} ${resName[t.resourceType] || t.resourceType}</td>
         <td style="font-family:monospace;color:var(--gold)">${t.number}</td>
         <td id="terr-owner-cell-${id}">
@@ -1802,30 +1827,6 @@ function stopPolling() {
 // ═══════════════════════════════════════════════════════════════
 // ADMIN ACTIONS
 // ═══════════════════════════════════════════════════════════════
-async function saveResources(groupId) {
-  const state = gameState;
-  if (!state) return;
-  const resources = ['wood', 'stone', 'iron'];
-
-  for (const res of resources) {
-    const inp = document.getElementById(`res-${groupId}-${res}`);
-    if (!inp) continue;
-    const val = parseInt(inp.value) || 0;
-
-    const r = await apiFetch(`${API}/api/admin/resources`, {
-      method: 'POST',
-      body: { groupId, resource: res, value: val },
-    });
-    const data = await r.json();
-    if (!r.ok) { showToast(data.error || 'Fehler', true); return; }
-  }
-
-  showToast(`✅ Ressourcen gespeichert`);
-  const r2 = await apiFetch(`${API}/api/game`);
-  const d2 = await r2.json();
-  updateAll(d2);
-}
-
 async function adminSetOwner(territoryId, newOwner) {
   const r = await apiFetch(`${API}/api/admin/territory`, {
     method: 'POST',

@@ -25,11 +25,6 @@ Dein Code bleibt für die **gesamte Spiel-Session** gleich. Merke ihn dir!
 | **Stein** 🪨 | Grau | Häufig | 8 |
 | **Eisen** ⚙️ | Dunkelblau | Am seltensten, nur am Spielfeldrand | 6 |
 
-**Habsburg Burg** (Territorium 24 – unten rechts):
-- Die Hauptstadt 👑
-- **10 Siegpunkte** für die Gruppe, die sie kontrolliert!
-- Am schwierigsten zu erobern
-
 ### Die Würfelzahl
 Oben rechts jedes Territoriums eine Zahl (2–12).
 
@@ -81,12 +76,16 @@ Alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
    - Turm, Stützpunkt oder Burg — je nachdem, welche Ressourcen du hast und wo du bauen willst
 
 2. **Auf die Karte ziehen**
-   - Während du ziehst, werden alle für dich gültigen Standorte auf der Karte als gestrichelte Punkte markiert
+   - Während du ziehst, werden **alle** möglichen Standorte für diese Baute als Punkte markiert:
+     goldene Punkte sind für dich erlaubt, rötliche Punkte sind (noch) nicht erlaubt (z.B. weil dir
+     eines der Gebiete nicht gehört, oder weil dort schon eine Baute steht)
    - Ein Turm braucht 1 eigenes Gebiet, ein Stützpunkt 2 aneinandergrenzende eigene Gebiete, eine Burg 3 Gebiete, die sich an einer Ecke berühren — **alle** beteiligten Gebiete müssen dir gehören
 
 3. **Über einem markierten Punkt loslassen**
    - Der Punkt leuchtet auf, wenn du nah genug bist
-   - Loslassen außerhalb eines Punkts bricht den Bauvorgang ab, ohne etwas zu kosten
+   - Loslassen über einem goldenen Punkt baut sofort
+   - Loslassen über einem rötlichen Punkt baut nicht, zeigt dir aber genau den Grund an (z.B. "Du besitzt nicht alle für diese Baute nötigen Gebiete.")
+   - Loslassen außerhalb jedes Punkts bricht den Bauvorgang ab, ohne etwas zu kosten
 
 4. **Fertig**
    - Ressourcen werden abgezogen, die Baute erscheint sofort auf der Karte
@@ -106,7 +105,6 @@ Alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
 - Turm: 1 Punkt
 - Stützpunkt: 2 Punkte
 - Burg: 5 Punkte
-- **Habsburg Burg kontrollieren: 10 Punkte** 👑
 
 **Wer hat am meisten Punkte am Ende?** → Der Sieger! 🏆
 
@@ -168,9 +166,6 @@ Zeigt die letzten 40 Aktionen:
 ### 4. Zusammenhängende Territorien
 → Nur wenn deine Gebiete aneinandergrenzen, kannst du Stützpunkte und Burgen bauen — plane deine Gebietswünsche beim Admin entsprechend
 
-### 5. Die Burg anvisieren
-→ Habsburg Burg (👑 Territorium 24) = 10 Punkte + Ansehen!
-
 ---
 
 ## ⚠️ Fehler & Troubleshooting
@@ -184,8 +179,8 @@ Zeigt die letzten 40 Aktionen:
 ### "Du besitzt nicht alle für diese Baute nötigen Gebiete"
 → Frag den Admin, dir die fehlenden Gebiete zuzuweisen, bevor du dort baust
 
-### Keine markierten Punkte beim Ziehen sichtbar
-→ Du besitzt noch keine passenden Gebiete für diese Baute (bzw. bei Stützpunkt/Burg: keine zwei/drei zusammenhängenden eigenen Gebiete)
+### Nur rötliche Punkte beim Ziehen sichtbar, keine goldenen
+→ Du besitzt noch keine passenden Gebiete für diese Baute (bzw. bei Stützpunkt/Burg: keine zwei/drei zusammenhängenden eigenen Gebiete). Frag den Admin nach den fehlenden Gebieten.
 
 ### "Würfel läuft nicht"
 → Frag Admin nach! Evtl. Auto-Dice ist deaktiviert

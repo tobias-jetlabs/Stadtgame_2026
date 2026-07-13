@@ -274,6 +274,15 @@ router.post('/api/admin/building', authMiddleware, adminOnly, (req, res) => {
     const removed = state.structures.splice(idx, 1)[0];
     const spotLabel = removed.territories.map(id => state.territories[id]?.label || id).join(' / ');
     db.addEvent(`🔧 Admin: ${state.buildings[removed.type]?.label || removed.type} bei ${spotLabel} entfernt.`);
+  } else if (action === 'transfer') {
+    const structure = state.structures.find(s => s.id === structureId);
+    if (!structure) return res.status(400).json({ error: 'Baute nicht gefunden' });
+    if (!state.groups[owner]) return res.status(400).json({ error: 'Unbekannte Gruppe' });
+
+    const oldOwnerName = state.groups[structure.owner]?.name || structure.owner;
+    structure.owner = owner;
+    const spotLabel = structure.territories.map(id => state.territories[id]?.label || id).join(' / ');
+    db.addEvent(`🔧 Admin: ${state.buildings[structure.type]?.label || structure.type} bei ${spotLabel} → Besitzer von ${oldOwnerName} zu ${state.groups[owner].name} geändert.`);
   }
 
   db.recalcPoints();

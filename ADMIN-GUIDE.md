@@ -89,9 +89,13 @@ Pro Gruppe drei Eingabefelder für:
 - ⚙️ Eisen
 
 **Ablauf:**
-1. Zahlen eingeben
-2. "Speichern" klicken
+1. Zahl in ein Feld eintippen
+2. Feld verlassen (Tab / Klick woanders / Enter) — der Wert wird **sofort** gespeichert, kein
+   separater "Speichern"-Knopf nötig
 3. Alle Spieler sehen sofort die neuen Werte (für alle Gruppen sichtbar)
+
+Jedes Feld speichert für sich allein, unabhängig von den anderen beiden — ein Tippfehler in einem
+Feld verhindert nicht, dass die anderen gespeichert werden.
 
 **Usecase:** Initialisierung, Sanktionen, Fehlerkorrektur
 
@@ -99,8 +103,8 @@ Pro Gruppe drei Eingabefelder für:
 
 ### 3️⃣ BAUTEN VERWALTEN
 
-Freies Hinzufügen/Entfernen von Bauten, **ohne** Kosten und **ohne** Besitzprüfung — dein direkter
-Eingriff, unabhängig von dem, was Spieler per Drag & Drop dürfen.
+Freies Hinzufügen/Entfernen/Besitzer-Ändern von Bauten, **ohne** Kosten und **ohne** Besitzprüfung —
+dein direkter Eingriff, unabhängig von dem, was Spieler per Drag & Drop dürfen.
 
 **Hinzufügen:**
 1. Bautentyp wählen (Turm/Stützpunkt/Burg) — die Standort-Auswahl daneben passt sich automatisch an
@@ -109,11 +113,14 @@ Eingriff, unabhängig von dem, was Spieler per Drag & Drop dürfen.
 3. Besitzer-Gruppe wählen
 4. "Hinzufügen" klicken
 
-**Entfernen:** Auf eine Baute in der Liste darunter klicken (✕).
+**Besitzer ändern:** Jede Baute in der Liste darunter hat ein eigenes Besitzer-Dropdown — einfach
+eine andere Gruppe auswählen, die Änderung greift sofort.
+
+**Entfernen:** Auf das ✕ neben einer Baute in der Liste klicken.
 
 **Wichtig:** Baute-Besitz ist unabhängig vom Gebietsbesitz. Wenn du einer anderen Gruppe ein Gebiet
 zuweist, bleiben die bereits dort/daran stehenden Bauten beim ursprünglichen Besitzer — sie wechseln
-nicht automatisch mit.
+nicht automatisch mit. Nutze das Besitzer-Dropdown hier, um das bei Bedarf manuell nachzuziehen.
 
 ---
 
@@ -191,9 +198,8 @@ Ressourcen aller Gruppen sind für Admin **und** alle Spieler als exakte Zahlen 
 ### "Uri hat nicht genug Ressourcen zum Bauen"
 **Lösung:**
 1. Admin-Panel → Ressourcen-Bereich
-2. Bei Uri "Holz" auf 50 setzen
-3. "Speichern"
-4. Spieler kann jetzt bauen
+2. Bei Uri "Holz" auf 50 setzen, Feld verlassen — sofort gespeichert
+3. Spieler kann jetzt bauen
 
 ### "Würfel läuft nicht"
 **Überprüfen:**

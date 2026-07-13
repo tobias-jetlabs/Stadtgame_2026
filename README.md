@@ -48,9 +48,9 @@ luzern:       E5B6-DDRC
 - ❌ Konfiguration ändern
 
 ### ⚙️ ADMINISTRATOR
-- ✅ **Alle** Ressourcen aller Gruppen anpassen (live)
+- ✅ **Alle** Ressourcen aller Gruppen anpassen (live, direkt pro Feld)
 - ✅ Territorium-Besitzer ändern
-- ✅ Bauten frei hinzufügen/entfernen (ohne Kosten, ohne Besitzprüfung)
+- ✅ Bauten frei hinzufügen/entfernen/Besitzer ändern (ohne Kosten, ohne Besitzprüfung)
 - ✅ Würfeln manuell oder automatisch
 - ✅ Auto-Dice Interval konfigurieren (1–120 Min)
 - ✅ Komplettes Spiel zurücksetzen
@@ -68,7 +68,7 @@ luzern:       E5B6-DDRC
 - **Stein** (🪨) – 8 Felder, Mittelringe (häufig)
 - **Eisen** (⚙️) – 6 Felder, ausschliesslich am Spielfeldrand (seltener)
 
-**Habsburg Burg (Territorium 24)** – Die Hauptstadt, 10 VP wenn kontrolliert!
+Alle 24 Territorien sind gleichwertig — es gibt kein Sonderfeld/keine Hauptstadt.
 
 ---
 
@@ -154,11 +154,12 @@ POST /stadtgame/api/admin/territory
 { "territoryId": "5", "owner": "uri" }
 ```
 
-#### Baute hinzufügen/entfernen (kostenlos, ohne Besitzprüfung)
+#### Baute hinzufügen/entfernen/Besitzer ändern (kostenlos, ohne Besitzprüfung)
 ```
 POST /stadtgame/api/admin/building
 { "action": "add", "buildingType": "burg", "locationId": "1-2-5", "owner": "uri" }
 { "action": "remove", "structureId": "1735689600000-abcde" }
+{ "action": "transfer", "structureId": "1735689600000-abcde", "owner": "schwyz" }
 ```
 
 #### Würfeln (manuell)

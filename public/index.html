@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
 <title>Habsburger Stadtgame</title>
 <style>
 /* ═══════════════════════════════════════════ RESET & VARS */
@@ -24,11 +24,15 @@
   --iron-col:   #607080;
 }
 
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--ink);
   color: var(--parchment);
   font-family: 'Georgia', serif;
-  min-height: 100vh;
   overflow-x: hidden;
 }
 
@@ -120,56 +124,73 @@ body {
 }
 
 /* ═══════════════════════════════════════════ MAIN APP */
-#app { display: none; flex-direction: column; min-height: 100vh; }
+/* Mobile-first: #app fills the real visible viewport (100dvh accounts for
+   mobile browser toolbars that 100vh ignores), header/tabs take their
+   natural height, and .content simply gets whatever is left — no magic
+   "subtract 100px" number that breaks the moment the header wraps. */
+#app {
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
 
 /* ── HEADER */
 header {
   background: linear-gradient(180deg, #2a1a04 0%, var(--ink2) 100%);
   border-bottom: 2px solid var(--gold-dim);
-  padding: 10px 20px;
+  padding: 8px 10px;
+  padding-top: calc(8px + env(safe-area-inset-top));
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
   position: sticky; top: 0; z-index: 100;
   box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  flex-shrink: 0;
 }
 
 .hdr-title {
-  font-size: 1.2rem;
+  font-size: 0.92rem;
   color: var(--gold2);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.hdr-title span { color: var(--gold-dim); font-size: 0.75rem; }
+.hdr-title span { display: none; }
 
 .hdr-player-badge {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(200,148,42,0.2);
   border-radius: 5px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  padding: 4px 9px;
+  font-size: 0.72rem;
   color: #bbb;
 }
 
 .hdr-dot {
-  width: 9px; height: 9px; border-radius: 50%;
+  width: 8px; height: 8px; border-radius: 50%;
   box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
 }
 
 .hdr-dice-box {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 7px;
   background: rgba(200,148,42,0.08);
   border: 1px solid rgba(200,148,42,0.25);
   border-radius: 5px;
-  padding: 6px 14px;
-  font-size: 0.8rem;
+  padding: 4px 10px;
+  font-size: 0.72rem;
   color: var(--gold-dim);
 }
 
 .hdr-dice-val {
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   font-weight: bold;
   color: var(--gold);
   font-family: 'Courier New', monospace;
@@ -179,11 +200,11 @@ header {
 .hdr-timer {
   font-family: 'Courier New', monospace;
   color: #8a7a50;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .hdr-auto-badge {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   background: rgba(0,200,100,0.1);
   border: 1px solid rgba(0,200,100,0.25);
   color: #4a8;
@@ -196,10 +217,11 @@ header {
   border: 1px solid rgba(200,148,42,0.2);
   color: var(--gold-dim);
   border-radius: 4px;
-  padding: 5px 10px;
+  padding: 7px 10px;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   transition: all 0.15s;
+  min-height: 34px;
 }
 .logout-btn:hover { border-color: var(--gold); color: var(--gold2); }
 
@@ -209,17 +231,24 @@ header {
   border-bottom: 1px solid rgba(200,148,42,0.15);
   display: flex;
   gap: 0;
-  padding: 0 20px;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .tab {
-  padding: 10px 18px;
-  font-size: 0.82rem;
+  padding: 12px 10px;
+  font-size: 0.8rem;
   color: var(--gold-dim);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.15s;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  flex: 1;
+  text-align: center;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab:hover { color: var(--gold2); }
@@ -230,57 +259,99 @@ header {
   flex: 1;
   display: flex;
   min-height: 0;
-  height: calc(100vh - 100px);
 }
 
-.panel { display: none; flex: 1; overflow: hidden; }
+.panel { display: none; flex: 1; overflow: hidden; min-height: 0; }
 .panel.active { display: flex; }
 
 /* ═══════════════════════════════════════════ MAP PANEL */
+/* Mobile-first: map on top (fixed share of the viewport height, with its own
+   pinch-zoom/pan viewport since a landscape 24-hex board never fits legibly
+   on a narrow portrait screen), sidebar content below, scrollable. The
+   row-based, fixed-280px-sidebar desktop layout is restored further down
+   under the @media (min-width: 900px) block. */
 #panel-map {
-  flex-direction: row;
+  flex-direction: column;
   gap: 0;
 }
 
 .map-area {
-  flex: 1;
+  flex: 0 0 auto;
+  height: 46dvh;
+  min-height: 260px;
   background: #140f08;
-  padding: 16px;
+  padding: 8px 8px 4px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-.map-area h3 {
-  font-size: 0.7rem;
-  color: var(--gold-dim);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  opacity: 0.7;
+.map-area h3 { display: none; }
+
+.map-viewport {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  border-radius: 6px;
 }
 
 #map-svg {
-  flex: 1;
   width: 100%;
-  max-height: 100%;
+  height: 100%;
+  display: block;
+  transform-origin: 0 0;
 }
+
+.map-zoom-controls {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 10;
+}
+
+.map-zoom-btn {
+  width: 34px; height: 34px;
+  background: rgba(20,15,8,0.85);
+  border: 1px solid rgba(200,148,42,0.35);
+  color: var(--gold2);
+  border-radius: 5px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.map-zoom-btn:active { background: rgba(200,148,42,0.25); }
 
 /* ── MAP SIDEBAR */
 .map-sidebar {
-  width: 280px;
-  border-left: 1px solid rgba(200,148,42,0.15);
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border-top: 1px solid rgba(200,148,42,0.15);
   background: var(--ink2);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .msb-section {
-  padding: 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(200,148,42,0.1);
 }
+
+.msb-section summary {
+  cursor: pointer;
+  list-style: none;
+}
+.msb-section summary::-webkit-details-marker { display: none; }
 
 .msb-title {
   font-size: 0.68rem;
@@ -289,7 +360,15 @@ header {
   text-transform: uppercase;
   margin-bottom: 10px;
   opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+
+.msb-section summary .msb-title { margin-bottom: 0; }
+.msb-caret { transition: transform 0.15s; opacity: 0.7; }
+.msb-section[open] .msb-caret { transform: rotate(90deg); }
+.msb-section summary .msb-title + * { margin-top: 10px; }
 
 /* Score rows */
 .score-row {
@@ -345,45 +424,56 @@ header {
   color: #8a7a60;
 }
 
-/* Build panel (player) */
+/* Build panel (player) — a horizontally swipeable strip of cards on mobile
+   (vertical space is precious there), stacked vertically again on desktop. */
 .build-section {
-  padding: 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(200,148,42,0.1);
+  flex-shrink: 0;
 }
 
 .build-hint {
   font-size: 0.68rem;
   color: #7a6a50;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   line-height: 1.4;
 }
 
 .build-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
 }
 
 .build-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  text-align: center;
+  gap: 4px;
+  padding: 10px 12px;
   background: rgba(200,148,42,0.07);
   border: 1px solid rgba(200,148,42,0.2);
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: grab;
   touch-action: none;
   transition: all 0.15s;
+  flex: 0 0 auto;
+  min-width: 92px;
+  scroll-snap-align: start;
 }
 
 .build-card:hover { background: rgba(200,148,42,0.16); border-color: var(--gold); }
 .build-card:active { cursor: grabbing; }
 
 .build-card-icon { flex-shrink: 0; color: var(--gold2); }
-.build-card-info { flex: 1; min-width: 0; }
-.build-card-name { font-size: 0.78rem; color: var(--gold2); }
-.build-card-cost { display: flex; gap: 8px; margin-top: 3px; }
+.build-card-info { min-width: 0; }
+.build-card-name { font-size: 0.76rem; color: var(--gold2); white-space: nowrap; }
+.build-card-cost { display: flex; gap: 6px; margin-top: 4px; justify-content: center; flex-wrap: wrap; }
 
 .cost-chip {
   display: inline-flex;
@@ -416,14 +506,8 @@ header {
 .drop-target.blocked { fill: rgba(150,60,60,0.06); stroke: #7a4040; stroke-width: 1.2; }
 .drop-target.blocked.hover { fill: rgba(190,60,60,0.4); stroke: #c04040; stroke-width: 2.5; stroke-dasharray: none; }
 
-/* Event log */
-.event-log {
-  flex: 1;
-  padding: 14px;
-  overflow-y: auto;
-  min-height: 0;
-}
-
+/* Event log — sits inside a <details class="msb-section">, so the whole
+   sidebar scrolls together as one region rather than nesting scrollables. */
 .ev-item {
   display: flex;
   gap: 7px;
@@ -447,15 +531,19 @@ header {
 #panel-admin {
   flex-direction: column;
   overflow-y: auto;
-  padding: 20px;
-  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  gap: 12px;
   background: var(--ink);
 }
 
+/* Single column by default (mobile) — restored to a 2-column grid on
+   wider screens further down under @media (min-width: 900px). */
 .admin-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .admin-card {
@@ -498,9 +586,10 @@ header {
   border: 1px solid rgba(200,148,42,0.25);
   border-radius: 4px;
   color: var(--parchment);
-  padding: 6px 10px;
-  font-size: 0.82rem;
+  padding: 9px 10px;
+  font-size: 0.85rem;
   width: 90px;
+  min-height: 38px;
   font-family: 'Courier New', monospace;
 }
 
@@ -509,21 +598,23 @@ header {
   border: 1px solid rgba(200,148,42,0.25);
   border-radius: 4px;
   color: var(--parchment);
-  padding: 6px 10px;
-  font-size: 0.82rem;
+  padding: 9px 10px;
+  font-size: 0.85rem;
+  min-height: 38px;
 }
 
 .adm-select option { background: #1c1810; }
 
 .adm-btn {
-  padding: 7px 14px;
+  padding: 10px 16px;
   background: rgba(200,148,42,0.12);
   border: 1px solid rgba(200,148,42,0.3);
   color: var(--gold2);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   transition: all 0.15s;
+  min-height: 40px;
 }
 
 .adm-btn:hover { background: rgba(200,148,42,0.25); border-color: var(--gold); }
@@ -586,6 +677,7 @@ header {
 .res-group-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 8px;
   background: rgba(255,255,255,0.02);
@@ -600,13 +692,14 @@ header {
 .res-group-name {
   font-size: 0.75rem;
   color: #ccc;
-  width: 90px;
+  min-width: 64px;
   flex-shrink: 0;
 }
 
 .res-inputs {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
   flex: 1;
   align-items: center;
 }
@@ -619,13 +712,14 @@ header {
 }
 
 .res-inp {
-  width: 56px;
+  width: 58px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(200,148,42,0.2);
   border-radius: 3px;
   color: var(--parchment);
-  padding: 4px 6px;
-  font-size: 0.78rem;
+  padding: 8px 6px;
+  font-size: 0.8rem;
+  min-height: 36px;
   font-family: 'Courier New', monospace;
   text-align: right;
 }
@@ -752,17 +846,54 @@ header {
 ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
 ::-webkit-scrollbar-thumb { background: rgba(200,148,42,0.2); border-radius: 3px; }
 
-@media (max-width: 900px) {
-  .admin-grid { grid-template-columns: 1fr; }
-  .admin-card.full { grid-column: 1; }
-  #panel-map { flex-direction: column; }
-  .map-sidebar { width: 100%; max-height: 45vh; }
-}
-
-/* ── Legend dots ── */
-.legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+/* ── Legend dots (hidden on mobile — the resource icon on every tile plus
+   tap-to-inspect already covers this; restored on desktop below) ── */
+.legend { display: none; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
 .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: #8a7a60; }
 .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+/* ═══════════════════════════════════════════ DESKTOP (≥900px) ═══════════
+   Everything above is mobile-first. From here on, restore the roomier
+   side-by-side desktop layout: map + fixed sidebar, vertical build list,
+   two-column admin grid, full-size header/tabs. */
+@media (min-width: 900px) {
+  header {
+    padding: 10px 20px;
+    flex-wrap: nowrap;
+    gap: 14px;
+  }
+  .hdr-title { font-size: 1.2rem; }
+  .hdr-title span { display: inline; color: var(--gold-dim); font-size: 0.75rem; }
+  .hdr-player-badge { padding: 6px 12px; font-size: 0.8rem; }
+  .hdr-dice-box { padding: 6px 14px; font-size: 0.8rem; gap: 10px; }
+  .hdr-dice-val { font-size: 1.6rem; }
+  .hdr-timer { font-size: 0.9rem; }
+  .logout-btn { padding: 5px 10px; font-size: 0.75rem; min-height: auto; }
+
+  .tab-bar { padding: 0 20px; }
+  .tab { flex: 0 0 auto; padding: 10px 18px; min-height: auto; }
+
+  #panel-map { flex-direction: row; }
+
+  .map-area { flex: 1; height: auto; min-height: 0; padding: 16px; }
+  .map-area h3 { display: block; }
+  .legend { display: flex; }
+
+  .map-sidebar {
+    width: 280px;
+    flex: none;
+    border-top: none;
+    border-left: 1px solid rgba(200,148,42,0.15);
+  }
+
+  .build-list { flex-direction: column; overflow-x: visible; }
+  .build-card { flex-direction: row; text-align: left; min-width: 0; }
+  .build-card-cost { justify-content: flex-start; }
+
+  #panel-admin { padding: 20px; gap: 16px; }
+  .admin-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .admin-card.full { grid-column: 1 / -1; }
+}
 </style>
 </head>
 <body>
@@ -819,19 +950,26 @@ header {
     <div class="panel active" id="panel-map">
       <div class="map-area">
         <h3>Karte von Altdorf – 24 Territorien</h3>
-        <svg id="map-svg" viewBox="0 0 780 600" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="glow-f" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="3" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="glow-sm" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="1.5" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <!-- filled by JS -->
-        </svg>
+        <div class="map-viewport" id="map-viewport">
+          <svg id="map-svg" viewBox="0 0 780 600" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow-f" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="glow-sm" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1.5" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- filled by JS -->
+          </svg>
+          <div class="map-zoom-controls">
+            <button class="map-zoom-btn" type="button" onclick="zoomMapBtn(1)" aria-label="Vergrössern">+</button>
+            <button class="map-zoom-btn" type="button" onclick="zoomMapBtn(-1)" aria-label="Verkleinern">−</button>
+            <button class="map-zoom-btn" type="button" onclick="resetMapZoom()" aria-label="Ansicht zurücksetzen">⤢</button>
+          </div>
+        </div>
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:#6b4c2a"></div>Holzfelder (Innen)</div>
           <div class="legend-item"><div class="legend-dot" style="background:#5a5a6a"></div>Steinfelder (Mitte)</div>
@@ -841,23 +979,23 @@ header {
 
       <div class="map-sidebar">
         <!-- Scoreboard -->
-        <div class="msb-section">
-          <div class="msb-title">⚔ Rangliste</div>
+        <details class="msb-section" id="scoreboard-section" open>
+          <summary><div class="msb-title">⚔ Rangliste <span class="msb-caret">▸</span></div></summary>
           <div id="scoreboard"></div>
-        </div>
+        </details>
 
         <!-- Build section (shown for players) -->
         <div class="build-section" id="player-build-section">
           <div class="msb-title">⚒ Bauen</div>
-          <div class="build-hint">Baute auf die Karte ziehen und über einem markierten Punkt loslassen.</div>
+          <div class="build-hint">Baute anfassen, auf die Karte ziehen und über einem markierten Punkt loslassen.</div>
           <div class="build-list" id="build-list"></div>
         </div>
 
         <!-- Event Log -->
-        <div class="event-log" id="event-log">
-          <div class="msb-title">📜 Ereignisse</div>
+        <details class="msb-section" id="event-log-section" open>
+          <summary><div class="msb-title">📜 Ereignisse <span class="msb-caret">▸</span></div></summary>
           <div id="event-list"></div>
-        </div>
+        </details>
       </div>
     </div>
 
@@ -967,6 +1105,7 @@ let gameState = null;
 let pollTimer = null;
 let uiTimer = null;
 let dragState = null; // active drag-to-build operation, see startDrag()
+let mapView = { scale: 1, x: 0, y: 0 }; // pan/zoom transform applied to #map-svg
 
 // ═══════════════════════════════════════════════════════════════
 // HEX GRID – 24 territories in a proper hex layout
@@ -1255,6 +1394,8 @@ function renderMap(state) {
 
     g.addEventListener('mouseenter', e => showTooltip(e, id, terr, state));
     g.addEventListener('mouseleave', hideTooltip);
+    // Touch has no hover — tapping a territory shows the same info instead.
+    g.addEventListener('click', e => { e.stopPropagation(); showTooltip(e, id, terr, state); });
     g.style.cursor = 'default';
 
     svg.appendChild(g);
@@ -1301,13 +1442,21 @@ function showTooltip(e, id, terr, state) {
     <div class="tt-line" style="color:#5a4a30">ID: ${id}</div>
   `;
   tt.style.display = 'block';
-  tt.style.left = (e.clientX + 14) + 'px';
-  tt.style.top  = (e.clientY + 14) + 'px';
+  // Clamp so the tooltip never runs off-screen — important on narrow phones
+  // where a tap near the edge would otherwise push it half off-screen.
+  const maxLeft = window.innerWidth - tt.offsetWidth - 10;
+  const maxTop = window.innerHeight - tt.offsetHeight - 10;
+  tt.style.left = Math.max(10, Math.min(e.clientX + 14, maxLeft)) + 'px';
+  tt.style.top  = Math.max(10, Math.min(e.clientY + 14, maxTop)) + 'px';
 }
 
 function hideTooltip() {
   document.getElementById('tooltip').style.display = 'none';
 }
+
+// Tapping anywhere outside a territory (which stops propagation on its own
+// click) dismisses an open tooltip — the touch equivalent of mouseleave.
+document.addEventListener('click', hideTooltip);
 
 // ═══════════════════════════════════════════════════════════════
 // SCOREBOARD
@@ -1428,6 +1577,12 @@ function startDrag(type, evt) {
   const rawTargets = computeAllTargets(type);
   if (!rawTargets.length) return; // no spots of this kind exist on the board at all
 
+  // Capture the pointer to the card that started the drag, so all further
+  // events for this finger/pointer keep targeting it (and window) instead of
+  // whatever happens to be underneath — this is also what keeps the map's
+  // own pan/pinch-zoom gesture handling from ever seeing this pointer.
+  try { evt.currentTarget.setPointerCapture(evt.pointerId); } catch(e) { /* not every browser allows capturing every pointer */ }
+
   const svg = document.getElementById('map-svg');
   const ghost = document.createElement('div');
   ghost.className = 'drag-ghost';
@@ -1436,14 +1591,19 @@ function startDrag(type, evt) {
 
   // Every spot is shown and droppable — allowed ones in gold, blocked ones
   // dimmed/red — so dropping always gives a concrete reason instead of the
-  // card just not reacting.
+  // card just not reacting. Radius is generous (touch fingers are imprecise).
   const targets = rawTargets.map(t => {
-    const circle = svgEl('circle', { cx: t.x, cy: t.y, r: 14, class: t.allowed ? 'drop-target' : 'drop-target blocked' });
+    const circle = svgEl('circle', { cx: t.x, cy: t.y, r: 20, class: t.allowed ? 'drop-target' : 'drop-target blocked' });
     svg.appendChild(circle);
     return { ...t, el: circle };
   });
 
-  dragState = { type, ghost, targets, hover: null };
+  // On touch, lift the ghost (and the point used for hit-testing) above the
+  // finger — otherwise the finger itself hides exactly the spot the player
+  // is trying to look at while placing a building.
+  const liftY = evt.pointerType === 'touch' ? 70 : 0;
+
+  dragState = { type, ghost, targets, hover: null, liftY };
   moveGhost(evt);
 
   window.addEventListener('pointermove', onDragMove);
@@ -1452,14 +1612,14 @@ function startDrag(type, evt) {
 
 function moveGhost(evt) {
   dragState.ghost.style.left = evt.clientX + 'px';
-  dragState.ghost.style.top = evt.clientY + 'px';
+  dragState.ghost.style.top = (evt.clientY - dragState.liftY) + 'px';
 }
 
 function onDragMove(evt) {
   if (!dragState) return;
   moveGhost(evt);
   const svg = document.getElementById('map-svg');
-  const { x, y } = svgUserPoint(svg, evt.clientX, evt.clientY);
+  const { x, y } = svgUserPoint(svg, evt.clientX, evt.clientY - dragState.liftY);
 
   let closest = null;
   let closestDist = Infinity;
@@ -1467,7 +1627,7 @@ function onDragMove(evt) {
     const d = Math.hypot(t.x - x, t.y - y);
     if (d < closestDist) { closestDist = d; closest = t; }
   }
-  const HOVER_RADIUS = 30;
+  const HOVER_RADIUS = 40;
   const newHover = (closest && closestDist < HOVER_RADIUS) ? closest : null;
   if (dragState.hover !== newHover) {
     dragState.targets.forEach(t => t.el.classList.remove('hover'));
@@ -1791,8 +1951,17 @@ function startApp() {
     document.getElementById('admin-tab').style.display = 'block';
   }
 
+  // On a phone-sized screen, start with Rangliste/Ereignisse collapsed so
+  // the map and the build list (the two things you actually touch) get the
+  // space — desktop has room to keep both open.
+  if (window.innerWidth < 900) {
+    document.getElementById('scoreboard-section').removeAttribute('open');
+    document.getElementById('event-log-section').removeAttribute('open');
+  }
+
   startPolling();
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // POLLING
@@ -1902,6 +2071,112 @@ function showToast(msg, isErr = false) {
   if (toastT) clearTimeout(toastT);
   toastT = setTimeout(() => el.classList.remove('show'), 3000);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// MAP PAN & ZOOM — a 780×600 landscape board never reads legibly at
+// fit-to-width on a narrow portrait phone, so the map gets its own
+// pinch-zoom/pan (a CSS transform on #map-svg), independent of page zoom
+// (disabled via the viewport meta tag so it can't fight this). Kept on
+// #map-viewport's own pointer listeners rather than window, and bails out
+// whenever a building drag is active, so it never fights that gesture.
+// ═══════════════════════════════════════════════════════════════
+const MAP_MIN_SCALE = 1;
+const MAP_MAX_SCALE = 4;
+
+function applyMapView() {
+  document.getElementById('map-svg').style.transform =
+    `translate(${mapView.x}px,${mapView.y}px) scale(${mapView.scale})`;
+}
+
+function clampMapView() {
+  const vp = document.getElementById('map-viewport');
+  const vw = vp.clientWidth, vh = vp.clientHeight;
+  const minX = Math.min(0, vw - vw * mapView.scale);
+  const minY = Math.min(0, vh - vh * mapView.scale);
+  mapView.x = Math.max(minX, Math.min(0, mapView.x));
+  mapView.y = Math.max(minY, Math.min(0, mapView.y));
+}
+
+function zoomMapAt(cx, cy, newScale) {
+  newScale = Math.max(MAP_MIN_SCALE, Math.min(MAP_MAX_SCALE, newScale));
+  const ratio = newScale / mapView.scale;
+  mapView.x = cx - (cx - mapView.x) * ratio;
+  mapView.y = cy - (cy - mapView.y) * ratio;
+  mapView.scale = newScale;
+  clampMapView();
+  applyMapView();
+}
+
+function resetMapZoom() {
+  mapView = { scale: 1, x: 0, y: 0 };
+  applyMapView();
+}
+
+function zoomMapBtn(dir) {
+  const vp = document.getElementById('map-viewport');
+  zoomMapAt(vp.clientWidth / 2, vp.clientHeight / 2, mapView.scale * (dir > 0 ? 1.5 : 1 / 1.5));
+}
+
+const mapPointers = new Map(); // pointerId -> last {x, y} (client coords)
+let mapPinchStartDist = null;
+let mapPinchMid = null;
+
+function mapViewportPointerDown(evt) {
+  if (dragState) return; // a building is being dragged — let that gesture own the pointer
+  // Capturing the pointer here would retarget the click the browser
+  // synthesizes after pointerup away from whatever was actually tapped — so
+  // leave taps on the zoom buttons (or anything else interactive we might
+  // add later) alone and let them work normally.
+  if (evt.target.closest('.map-zoom-controls')) return;
+  const vp = document.getElementById('map-viewport');
+  try { vp.setPointerCapture(evt.pointerId); } catch(e) { /* not every browser allows capturing every pointer */ }
+  mapPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+  if (mapPointers.size === 2) {
+    const pts = [...mapPointers.values()];
+    mapPinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    mapPinchMid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+  }
+}
+
+function mapViewportPointerMove(evt) {
+  if (!mapPointers.has(evt.pointerId)) return;
+  const prev = mapPointers.get(evt.pointerId);
+
+  if (mapPointers.size === 2) {
+    mapPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+    const pts = [...mapPointers.values()];
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+    if (mapPinchStartDist) {
+      const vpRect = document.getElementById('map-viewport').getBoundingClientRect();
+      const ratio = dist / mapPinchStartDist;
+      zoomMapAt(mapPinchMid.x - vpRect.left, mapPinchMid.y - vpRect.top, mapView.scale * ratio);
+    }
+    mapPinchStartDist = dist;
+    mapPinchMid = mid;
+    return;
+  }
+
+  mapPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+  mapView.x += evt.clientX - prev.x;
+  mapView.y += evt.clientY - prev.y;
+  clampMapView();
+  applyMapView();
+}
+
+function mapViewportPointerUp(evt) {
+  mapPointers.delete(evt.pointerId);
+  if (mapPointers.size < 2) { mapPinchStartDist = null; mapPinchMid = null; }
+}
+
+(function() {
+  const vp = document.getElementById('map-viewport');
+  vp.addEventListener('pointerdown', mapViewportPointerDown);
+  vp.addEventListener('pointermove', mapViewportPointerMove);
+  vp.addEventListener('pointerup', mapViewportPointerUp);
+  vp.addEventListener('pointercancel', mapViewportPointerUp);
+  window.addEventListener('resize', resetMapZoom);
+})();
 
 // Login on Enter
 document.getElementById('login-input').addEventListener('keydown', e => {

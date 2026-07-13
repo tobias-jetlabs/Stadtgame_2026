@@ -17,6 +17,14 @@ Dein Code bleibt für die **gesamte Spiel-Session** gleich. Merke ihn dir!
 
 ## 🗺 Spielfeld verstehen
 
+### Am Handy: Karte zoomen & verschieben
+Die Karte ist auf einem Handy-Bildschirm zu klein, um jedes Feld einzeln zu lesen. Zwei Wege zum Reinzoomen:
+- **Zwei Finger auseinanderziehen** (Pinch-Zoom) direkt auf der Karte
+- Die **+ / − / ⤢** Knöpfe unten rechts auf der Karte (⤢ setzt die Ansicht zurück)
+
+Mit einem Finger auf der Karte kannst du dich dann verschieben (pannen). Auf ein Gebiet **tippen**
+zeigt dir Name, Ressource, Würfelzahl, Besitzer und Bauten an — wie ein Mausklick am Computer.
+
 ### Territorium-Typen (Farben & Ressourcen)
 
 | Ressource | Farbe | Häufigkeit | Felder |
@@ -72,10 +80,12 @@ Alle Ressourcen aller Gruppen sind für jeden sichtbar (Rangliste).
 
 ### Bauen – Schritt für Schritt
 
-1. **Baute in der Seitenleiste anfassen** ("⚒ Bauen")
+1. **Baute in der Liste "⚒ Bauen" anfassen** (unter der Karte, seitlich durchwischbar)
    - Turm, Stützpunkt oder Burg — je nachdem, welche Ressourcen du hast und wo du bauen willst
 
 2. **Auf die Karte ziehen**
+   - Am Handy hebt sich die Baute beim Ziehen etwas über deinen Finger, damit dein Finger die
+     Zielpunkte nicht verdeckt
    - Während du ziehst, werden **alle** möglichen Standorte für diese Baute als Punkte markiert:
      goldene Punkte sind für dich erlaubt, rötliche Punkte sind (noch) nicht erlaubt (z.B. weil dir
      eines der Gebiete nicht gehört, oder weil dort schon eine Baute steht)
@@ -131,7 +141,7 @@ Nächster in: 12:45
 
 ## 📊 Rangliste
 
-Oben rechts: **"⚔ Rangliste"**
+Unter der Karte: **"⚔ Rangliste"** (am Handy eingeklappt — antippen zum Ausklappen)
 
 Zeigt alle Gruppen mit:
 - 🎯 Aktuelle Siegpunkte
@@ -141,7 +151,7 @@ Zeigt alle Gruppen mit:
 
 ## 📜 Ereignis-Log
 
-Unten rechts: **"📜 Ereignisse"**
+Unter der Karte: **"📜 Ereignisse"** (am Handy eingeklappt — antippen zum Ausklappen)
 
 Zeigt die letzten 40 Aktionen:
 ```

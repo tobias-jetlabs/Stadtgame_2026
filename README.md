@@ -97,6 +97,9 @@ aber aktuell **nicht implementiert**.
 - **Interval konfigurierbar:** 1–120 Minuten (default: 15 Min)
 - **Auto-Toggle:** Admin kann An/Aus-schalten
 - **Manuelles Würfeln:** Admin kann jederzeit manuell würfeln (2–12 oder zufällig)
+- **Würfelwahrscheinlichkeit:** Admin kann zwischen realer 2-Würfel-Verteilung (7 am häufigsten, 2/12
+  selten — Standard) und komplett gleichverteiltem Zufall (2–12 gleich wahrscheinlich) umschalten.
+  Gilt nur für zufällige Würfe, nicht für manuell eingegebene Werte.
 
 ### Ressourcen-Produktion
 Wenn die Würfelzahl fällt:
@@ -171,7 +174,7 @@ POST /stadtgame/api/admin/dice
 #### Auto-Dice konfigurieren
 ```
 POST /stadtgame/api/admin/dice-config
-{ "autoDice": true, "intervalMinutes": 20 }
+{ "autoDice": true, "intervalMinutes": 20, "realDiceProbability": true }
 ```
 
 #### Spiel zurücksetzen

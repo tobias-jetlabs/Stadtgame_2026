@@ -173,6 +173,18 @@ header {
   color: #bbb;
 }
 
+/* Own resource counts, shown right in the (sticky) header — this is the one
+   spot guaranteed to stay on-screen regardless of scroll position or which
+   sidebar sections are collapsed, so it's where "always visible" actually
+   holds true on a phone. */
+.hdr-res-chips { display: flex; gap: 8px; margin-left: 2px; }
+.hdr-res-chip {
+  display: flex; align-items: center; gap: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: var(--gold2);
+}
+
 .hdr-dot {
   width: 8px; height: 8px; border-radius: 50%;
   box-shadow: 0 0 6px currentColor;
@@ -922,6 +934,7 @@ header {
     <div class="hdr-player-badge" id="hdr-player-badge" style="display:none">
       <div class="hdr-dot" id="hdr-dot"></div>
       <span id="hdr-player-name"></span>
+      <div class="hdr-res-chips" id="hdr-res-chips"></div>
     </div>
 
     <div class="hdr-dice-box">
@@ -1014,6 +1027,14 @@ header {
               <span class="toggle-slider"></span>
             </label>
             <span style="font-size:0.8rem;color:#9a8a60">Automatisches Würfeln</span>
+          </div>
+
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="real-dice-toggle" onchange="saveAutoConfig()"/>
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:0.8rem;color:#9a8a60">Reale Würfelwahrscheinlichkeit (2 Würfel statt Gleichverteilung)</span>
           </div>
 
           <div class="dice-config-row">
@@ -1385,10 +1406,13 @@ function renderMap(state) {
     });
     g.appendChild(lblT);
 
-    const idT = svgText(cx + R - 11, cy + R - 13, id, {
-      fill: 'rgba(200,148,42,0.35)',
-      'font-size': '7',
-      'font-family': 'Courier New',
+    // Field number — simple and unobtrusive (small, muted, corner-placed),
+    // just there so fields can be referred to unambiguously by number.
+    const idT = svgText(cx + R - 12, cy + R - 14, id, {
+      fill: 'rgba(200,148,42,0.55)',
+      'font-size': '8.5',
+      'font-weight': 'bold',
+      'font-family': 'Courier New, monospace',
     });
     g.appendChild(idT);
 
@@ -1603,7 +1627,7 @@ function startDrag(type, evt) {
   // is trying to look at while placing a building.
   const liftY = evt.pointerType === 'touch' ? 70 : 0;
 
-  dragState = { type, ghost, targets, hover: null, liftY };
+  dragState = { type, ghost, targets, hover: null, liftY, pointerId: evt.pointerId };
   moveGhost(evt);
 
   window.addEventListener('pointermove', onDragMove);
@@ -1616,7 +1640,7 @@ function moveGhost(evt) {
 }
 
 function onDragMove(evt) {
-  if (!dragState) return;
+  if (!dragState || evt.pointerId !== dragState.pointerId) return; // some other finger (e.g. panning/pinching the map) moved — not ours
   moveGhost(evt);
   const svg = document.getElementById('map-svg');
   const { x, y } = svgUserPoint(svg, evt.clientX, evt.clientY - dragState.liftY);
@@ -1636,10 +1660,11 @@ function onDragMove(evt) {
   }
 }
 
-async function onDragEnd() {
+async function onDragEnd(evt) {
+  if (!dragState || evt.pointerId !== dragState.pointerId) return; // some other finger (e.g. panning/pinching the map) was lifted — not ours
+
   window.removeEventListener('pointermove', onDragMove);
   window.removeEventListener('pointerup', onDragEnd);
-  if (!dragState) return;
 
   const { type, hover, ghost, targets } = dragState;
   ghost.remove();
@@ -1693,6 +1718,7 @@ function renderAdminPanel(state) {
 
   document.getElementById('auto-dice-toggle').checked = !!state.autoDice;
   document.getElementById('dice-interval').value = state.diceIntervalMinutes || 15;
+  document.getElementById('real-dice-toggle').checked = !!state.realDiceProbability;
 
   document.getElementById('admin-codes-display').innerHTML =
     `<b style="color:#6a5a40">Secret Codes:</b><br>` +
@@ -1881,9 +1907,24 @@ function updateAll(state) {
 
   renderMap(state);
   renderScoreboard(state);
+  renderHdrResources(state);
   renderBuildSection(state);
   renderEvents(state);
   if (session?.role === 'admin') renderAdminPanel(state);
+}
+
+// Own resource counts in the header badge — the one place guaranteed to
+// stay visible on a phone regardless of scroll position.
+function renderHdrResources(state) {
+  const el = document.getElementById('hdr-res-chips');
+  const group = session?.role === 'player' && session.groupId ? state.groups[session.groupId] : null;
+  if (!group) { el.innerHTML = ''; return; }
+  const res = group.resources;
+  el.innerHTML = `
+    <span class="hdr-res-chip">${iconSvgString('wood', 13)}${res.wood ?? 0}</span>
+    <span class="hdr-res-chip">${iconSvgString('stone', 13)}${res.stone ?? 0}</span>
+    <span class="hdr-res-chip">${iconSvgString('iron', 13)}${res.iron ?? 0}</span>
+  `;
 }
 
 function updateTimer() {
@@ -2021,9 +2062,10 @@ async function adminDice() {
 async function saveAutoConfig() {
   const autoDice = document.getElementById('auto-dice-toggle').checked;
   const intervalMinutes = parseInt(document.getElementById('dice-interval').value) || 15;
+  const realDiceProbability = document.getElementById('real-dice-toggle').checked;
   const r = await apiFetch(`${API}/api/admin/dice-config`, {
     method: 'POST',
-    body: { autoDice, intervalMinutes },
+    body: { autoDice, intervalMinutes, realDiceProbability },
   });
   const data = await r.json();
   if (!r.ok) return showToast(data.error || 'Fehler', true);
@@ -2122,7 +2164,13 @@ let mapPinchStartDist = null;
 let mapPinchMid = null;
 
 function mapViewportPointerDown(evt) {
-  if (dragState) return; // a building is being dragged — let that gesture own the pointer
+  // Only ignore the exact finger that's dragging a building (normally it
+  // never even reaches here — setPointerCapture in startDrag already
+  // redirects it — this is just a fallback for browsers where that fails).
+  // A *different* finger is free to pan/pinch-zoom the map at the same
+  // time, so you can zoom in on the exact spot you want while still holding
+  // the building you're placing.
+  if (dragState && evt.pointerId === dragState.pointerId) return;
   // Capturing the pointer here would retarget the click the browser
   // synthesizes after pointerup away from whatever was actually tapped — so
   // leave taps on the zoom buttons (or anything else interactive we might

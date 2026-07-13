@@ -40,9 +40,19 @@ function scheduleNextRoll() {
   }, delay);
 }
 
+// Real 2d6: sum of two independent 1–6 rolls (triangular curve, 7 most
+// common). Uniform: every value 2–12 equally likely. Admin picks which via
+// state.realDiceProbability; a forced/manual roll always bypasses both.
+function rollDice(realDiceProbability) {
+  if (realDiceProbability) {
+    return (Math.floor(Math.random() * 6) + 1) + (Math.floor(Math.random() * 6) + 1);
+  }
+  return Math.floor(Math.random() * 11) + 2;
+}
+
 function rollAndDistribute(forcedRoll) {
   const state = db.getState();
-  const roll = forcedRoll ?? (Math.floor(Math.random() * 11) + 2);
+  const roll = forcedRoll ?? rollDice(state.realDiceProbability);
   state.lastDiceRoll = roll;
   db.setState(state);
   distributeResources(roll);
@@ -304,7 +314,7 @@ router.post('/api/admin/dice', authMiddleware, adminOnly, (req, res) => {
 
 // Admin: configure auto-dice
 router.post('/api/admin/dice-config', authMiddleware, adminOnly, (req, res) => {
-  const { autoDice, intervalMinutes } = req.body;
+  const { autoDice, intervalMinutes, realDiceProbability } = req.body;
   const state = db.getState();
 
   if (autoDice !== undefined) state.autoDice = !!autoDice;
@@ -314,10 +324,11 @@ router.post('/api/admin/dice-config', authMiddleware, adminOnly, (req, res) => {
     state.diceIntervalMinutes = mins;
     state.nextRollAt = Date.now() + mins * 60 * 1000;
   }
+  if (realDiceProbability !== undefined) state.realDiceProbability = !!realDiceProbability;
 
   db.setState(state);
   scheduleNextRoll();
-  db.addEvent(`🔧 Admin: Auto-Würfel ${state.autoDice ? 'aktiviert' : 'deaktiviert'}, Interval: ${state.diceIntervalMinutes} Min.`);
+  db.addEvent(`🔧 Admin: Auto-Würfel ${state.autoDice ? 'aktiviert' : 'deaktiviert'}, Interval: ${state.diceIntervalMinutes} Min., Würfelmodus: ${state.realDiceProbability ? 'Real (2 Würfel)' : 'Komplett zufällig'}`);
   res.json({ success: true, state: db.getState() });
 });
 

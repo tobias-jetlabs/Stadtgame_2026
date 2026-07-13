@@ -27,6 +27,10 @@ const DEFAULT_STATE = {
   nextRollAt: null,
   diceIntervalMinutes: 15,
   autoDice: true,
+  // true  = real 2d6 probability (2/12 rare, 7 most common) — matches the
+  //         board's number layout, which was designed around that curve.
+  // false = every value 2–12 equally likely.
+  realDiceProbability: true,
 
   groups: {
     uri:         { name: 'Uri',         color: '#e74c3c', resources: { wood: 20, stone: 10, iron: 5 }, points: 0, joined: false },

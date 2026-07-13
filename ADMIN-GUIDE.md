@@ -74,8 +74,16 @@ Fünf Hauptbereiche:
 - Interval in Minuten (1–120)
 - "Speichern" klicken
 
+**Würfelwahrscheinlichkeit:**
+- Toggle "Reale Würfelwahrscheinlichkeit (2 Würfel statt Gleichverteilung)"
+- **An (Standard):** Simuliert 2 echte Würfel — 7 ist am häufigsten, 2 und 12 sind selten (passt zur
+  Verteilung der Zahlen auf dem Spielfeld)
+- **Aus:** Jede Zahl 2–12 ist exakt gleich wahrscheinlich — komplett zufällig
+- Gilt nur für zufällige Würfe (Auto-Dice und "🎲 Würfeln" ohne Zahleingabe). Ein manuell
+  eingegebener Wert (siehe unten) überschreibt das immer.
+
 **Manuell würfeln:**
-- Zahl eingeben (2–12) oder leer lassen (zufällig)
+- Zahl eingeben (2–12) oder leer lassen (zufällig gemäss obiger Einstellung)
 - Button "🎲 Würfeln"
 - Ressourcen werden sofort verteilt
 

@@ -25,6 +25,8 @@ function load() {
   // Migrate saves from before the structures[] rework (old territory.buildings
   // arrays are simply dropped — they used building types that no longer exist).
   if (!Array.isArray(state.structures)) state.structures = [];
+  // Migrate saves from before the dice-probability toggle existed.
+  if (state.realDiceProbability === undefined) state.realDiceProbability = true;
 }
 
 function save() {
